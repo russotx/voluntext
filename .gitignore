@@ -5,6 +5,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# App specific
+oldserver.js
+
 # Runtime data
 pids
 *.pid
