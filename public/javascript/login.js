@@ -1,9 +1,9 @@
 // JS for login page
-var user;
+let user;
 
-var provider = new firebase.auth.FacebookAuthProvider();
+let provider = new firebase.auth.FacebookAuthProvider();
 
-var database = firebase.database();
+let database = firebase.database();
 
 document.getElementById("signIn").onclick = function(event){
   event.preventDefault();
@@ -25,15 +25,15 @@ function logout () {
 
 
 function authenticateUser() {
-  var email = document.getElementById("email").value;
-  var password = document.getElementById("password").value;
+  let email = document.getElementById("email").value;
+  let password = document.getElementById("password").value;
 
   firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
      //debugging purpose
     }).catch(function (error) {
       // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
+      let errorCode = error.code;
+      let errorMessage = error.message;
       console.log(errorMessage);
       if (errorCode === 'auth/wrong-password') {
         alert('Sorry, but the password was incorrect.');
@@ -69,7 +69,7 @@ function test (user) {
         console.log("yes");
         window.location = "/index";
         // Credential is facebook token
-        var credential = result.credential;
+        let credential = result.credential;
         }, function(error) {
           console.log(error);
           });
