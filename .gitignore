@@ -7,6 +7,9 @@ yarn-error.log*
 
 # App specific
 oldserver.js
+vtext.json
+.tern-project
+prod-build/
 
 # Runtime data
 pids
