@@ -1,0 +1,31 @@
+{
+  "name": "voluntext",
+  "version": "1.0.0",
+  "description": "app for tracking volunteer hours with help of sms",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon --exec babel-node server.js",
+    "build": "babel --out-dir prod-build",
+    "start": "npm run build && node prod-build/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/russotx/voluntext.git"
+  },
+  "author": "Daniel Russo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/russotx/voluntext/issues"
+  },
+  "homepage": "https://github.com/russotx/voluntext#readme",
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "nodemon": "^1.11.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "express-session": "^1.15.5"
+  }
+}

@@ -55,13 +55,13 @@ let theUser = '';
 // Get key for current user
 
 db.ref().once('value')
-  .then(function(snapshot) {
+  .then((snapshot) => {
     theDB = snapshot.val();
     theUser = theDB.currentlogin;  
-  }).then(function() {
+  }).then(() => {
       // console.log(theUser);
       userKey = getVolKey(theUser, theDB);
-    }).then(function() {
+    }).then(() => {
       // console.log(userKey);
       name = theDB.Volunteers[userKey].name;
       // console.log(name);
