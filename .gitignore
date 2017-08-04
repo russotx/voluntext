@@ -10,6 +10,7 @@ oldserver.js
 vtext.json
 .tern-project
 prod-build/
+.env
 
 # Runtime data
 pids
