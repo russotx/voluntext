@@ -11,6 +11,7 @@ vtext.json
 .tern-project
 prod-build/
 .env
+oldviews/
 
 # Runtime data
 pids

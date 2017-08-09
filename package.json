@@ -21,6 +21,7 @@
   "homepage": "https://github.com/russotx/voluntext#readme",
   "devDependencies": {
     "babel-cli": "^6.24.1",
+    "babel-preset-env": "^1.6.0",
     "nodemon": "^1.11.0"
   },
   "dependencies": {
