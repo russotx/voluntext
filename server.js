@@ -27,22 +27,26 @@ mongoClient.connect(devURL.auth, (err,db) => {
 
 // create Express app object
 const app = express()
-// create Router object
+// create Router objects
 const router = express.Router()
+
 // assign HTTP service routes to the router object via the routes module
 require('./routes/pub-routes')(router,__dirname)
+require('./routes/auth-routes')(router,__dirname)
 
 // --- assign middleware ---
 // serve css, js, and images as static
 app.use(express.static(path.join(__dirname,'public','css')))
 app.use(express.static(path.join(__dirname,'public','javascript')))
 app.use(express.static(path.join(__dirname,'public','images')))
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 // all paths use router object
 app.use(router)
-// use bodyParser
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
+
+ app.get('*', (req,res) => {
+   res.redirect('/')
+ })
 
 // listen for connections
 app.listen(process.env.PORT,(err)=>{

@@ -12,14 +12,10 @@ module.exports = (router, root) => {
     res.sendFile(path.join(root,'public','views','landing-page.html'))
   })
   
-  router.get('/login', (req,res)=>{
+  router.get('/login', (req,res,next)=>{
     console.log('going to login page')
     res.sendFile(path.join(root,'public','views','login2.html'))
   })
-
-  router.get('*', (req,res) => {
-    res.redirect('/')
-  })
-
-
+  
 }
+
