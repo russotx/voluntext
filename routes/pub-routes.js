@@ -8,6 +8,10 @@ module.exports = (router, root) => {
   // assign route behavior to the router object's HTTP services
 
   router.get('/', (req,res) => {
+    res.redirect('/about')
+  })
+
+  router.get('/about', (req,res) => {
     console.log('goingt to landing page')
     res.sendFile(path.join(root,'public','views','landing-page.html'))
   })
