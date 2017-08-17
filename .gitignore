@@ -12,6 +12,7 @@ vtext.json
 prod-build/
 .env
 oldviews/
+vtext-session.yaml
 
 # Runtime data
 pids

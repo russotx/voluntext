@@ -1,12 +1,36 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const mongoAuth = require('passport-local-mongoose')
+const bcrypt = require('bcrypt')
+const saltRounds = 5
+// set native promises as mongoose preferred promise library
+mongoose.Promise = global.Promise
 
-let userAccount = new Schema({
-  username: String,
-  password: String
+const Schema = mongoose.Schema
+
+let userAccountSchema = new Schema({
+  local: {  
+    email: String,
+    password: String
+  },
+  facebook: {
+    id: String,
+    token: String,
+    email: String,
+    name: String
+  }
 })
 
-userAccount.plugin(mongoAuth)
+userAccountSchema.methods.generateHash = function(password) {
+  console.log('creating password hash')
+  return bcrypt.hashSync(password, saltRounds)
+}
 
-module.exports = mongoose.model('userAccount', userAccount)
+userAccountSchema.methods.validPassword = function(password) {
+  console.log('comparing the password')
+  return bcrypt.compareSync(password, this.local.password)
+}
+
+module.exports = function(authMongoose) {
+
+  return authMongoose.model('UserAccount', userAccountSchema)
+
+}
