@@ -13,6 +13,7 @@ sessionSchema.methods.newSessionId = function() {
   return cryptoRandomString(32)
 }
 
+// receive mongoose auth db connection and export model
 module.exports = function(authMongoose) {
   return authMongoose.model('UserSession', sessionSchema)
 }

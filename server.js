@@ -1,12 +1,11 @@
 const express = require('express')
 const passport = require('passport')
-//const localStrategy = require('passport-local').Strategy
+
 const session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
 const bodyParser = require('body-parser')
-//const cookieParser = require('cookie-parser')
 const path = require('path')
-//const mongoClient = require('mongodb').MongoClient
+
 const mongoose = require('mongoose')
 const flash = require('connect-flash')
 const morgan = require('morgan')
@@ -18,16 +17,6 @@ mongoose.Promise = global.Promise
 // pull in environment variables
 require('dotenv').config()
 
-// const prodURL = {
-//   auth: '',
-//   volData: '',
-//   sessions: ''
-// }
-// const devURL = {
-//   auth: process.env.DEV_AUTH, // username/password store
-//   volData: process.env.DEV_VOLDATA, // user data collection
-//   sessions: process.env.DEV_SESSIONS // session store
-// }
 function newSessionId() {
   return cryptoRandomString(32)
 }
@@ -42,26 +31,31 @@ const dbURL = (process.env.ENVIRONMENT === 'development') ?
     volData: '',
   }
 
-// set up Mongoose connection to the auth database 
-// dbURL.auth will pull the correct url from environment
-/*let authDBconnection = mongoose.createConnection(dbURL.auth, function(error) {
-  if (error) {
-    console.log('mongo connection error: ',error)
-  } else {
-      console.log('mongo connection successful')
-    }
-  }) */
+// create a mongoose connection object and connect
 let authDBconnection = mongoose.createConnection(dbURL.auth)
-authDBconnection.on('connected',function(){ console.log('mongoose connected: auth dB') })
-authDBconnection.on('error', function(err){ console.log('auth DB connection error: ',err) })
-authDBconnection.on('close', function(){ console.log('auth DB connection closed') })
+  // mongoose event listeners
+  authDBconnection.on('connected',function(){ console.log('mongoose connected: auth dB') })
+  authDBconnection.on('error', function(err){ console.log('auth DB connection error: ',err) })
+  authDBconnection.on('close', function(){ console.log('auth DB connection closed') })
 
-const twentyFourHrsMS = 86400000 // in milliseconds
-const sixHoursS = 21600 // in seconds
+let dataDBconnection = mongoose.createConnection(dbURL.volData)
+  // mongoose event listeners
+  dataDBconnection.on('connected',function(){ console.log('mongoose connected: voldata dB') })
+  dataDBconnection.on('error', function(err){ console.log('voldata DB connection error: ',err) })
+  dataDBconnection.on('close', function(){ console.log('voldata DB connection closed') })
+
+function hoursConvert(hrs, unit='ms') {
+  let converted = hrs*3600
+  if (unit === 'ms') {
+    return converted*1000
+  }
+  return converted
+} 
+
 const proxyLevels = 1
 const sessOpts = {
   cookie: {
-    maxAge: twentyFourHrsMS,
+    maxAge: hoursConvert(24, 'ms'),
     sameSite: 'lax',
     secure: false, /* should set this to true on site with HTTPS! */
   },
@@ -70,15 +64,21 @@ const sessOpts = {
   resave: false, /* don't resave session if unchanged */
   saveUninitialized: false, /* new but unmodified sessions not saved */
   /* the session store instance (default is MemoryStore) */
-  store: new MongoStore( { mongooseConnection: authDBconnection, 
-                         touchAfter: sixHoursS } ), 
-  genid: function(req) {
+  store: new MongoStore( 
+    { 
+      mongooseConnection: authDBconnection, 
+      touchAfter: hoursConvert(6, 'sec'),
+      collection: 'usersessions',
+      ttl: hoursConvert(48, 'sec')
+    } 
+  ), 
+  genid: function() {
     return newSessionId()
   }
 }
 
 // configure passport.js strategy and seralization functions
-require('./config/passport-config')(passport, authDBconnection)
+require('./config/passport-config')(passport, authDBconnection, dataDBconnection)
 
 // --- SET UP EXPRESS APP ---
 const app = express()
@@ -93,13 +93,18 @@ app.use(express.static(path.join(__dirname,'public','images')))
 app.use(morgan('dev'))
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
-//app.use(cookieParser())
 // set up Express sessions
 app.use(session(sessOpts))
 // set up passport
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(flash())
+app.use((req, res, next) => {
+  console.log('mw | req.session = \n', req.session)
+  console.log('------------')
+  console.log('mw | req.user = \n', req.user)
+  next()
+})
 
 // --- set up router ---
 const router = express.Router()

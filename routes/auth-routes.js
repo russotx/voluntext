@@ -26,6 +26,7 @@ module.exports = (router, passport, root) => {
 
   router.get('/logout', (req, res) => {
     console.log('logging out')
+    console.log('req.session in logout = \n',req.session)
     req.logout()
     res.redirect('/about')
   })
@@ -41,6 +42,10 @@ module.exports = (router, passport, root) => {
 }
 
 function isLoggedIn(req, res, next) {
+  if (req.user) console.log('req.user = \n',req.user)
+  if (req.session) { console.log('req.session = \n',req.session) }
+    else { console.log('no req.session') }
+  //console.log('req._passport.instance in isLoggedIn: \n',req._passport.instance)
   if (req.isAuthenticated()) {
     console.log('user is logged in')
     return next()

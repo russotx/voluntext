@@ -29,6 +29,7 @@ userAccountSchema.methods.validPassword = function(password) {
   return bcrypt.compareSync(password, this.local.password)
 }
 
+// receive mongoose auth db connection and export model
 module.exports = function(authMongoose) {
 
   return authMongoose.model('UserAccount', userAccountSchema)
