@@ -83,7 +83,9 @@ const localStrategy = require('passport-local').Strategy
 // configure passport 
 module.exports = (passport, authMongoose, dataMongoose) => {
   // get mongoose models and pass in mongoose connection to auth db
+  // DB with user accounts for authentication
   const UserAccount = require('../models/user-account')(authMongoose)
+  // DB with volunteer data corresponding to users
   const VolDataDoc = require('../models/voldata-db')(dataMongoose)
 
   // ---- SESSION MANAGEMENT ----
@@ -118,18 +120,34 @@ module.exports = (passport, authMongoose, dataMongoose) => {
 
   // ---- ONBOARD/SIGNUP LOGIC ----
 
-  function createVolUser(req, email, password, done){
+  function createNewUser(email, password, phone, smsOpt=false, done) {
+    // create a new user account in the authentication database
     let newUser = new UserAccount()
-    newUser.local.email = email
-    newUser.local.password = newUser.generateHash(password)
-    newUser.save(function(err){
-      if (err) {
-        console.log('error saving new user: ',err)
+    // create a new user document in the volunteer data database
+    let newVolDoc = new VolDataDoc()
+    newUser.initUserAcct(email, password)
+      .then(newVolDoc.initDoc(email, phone, smsOpt)
+        // initDoc promise resolution
+        .then(newUser.setUserId(newVolDoc.userId, (err) => {
+          if (err) { 
+            console.log('error setting userId: ',err)
+            throw err
+          } else {
+            console.log('total success creating new user')
+            done(null, newUser)
+          }
+        }))
+        // initDoc promise rejection
+        .catch((err) => {
+          console.log('error initializing volunteer records: ',err)
+          throw err
+        })
+      )
+      // initUserAcct promise rejection
+      .catch((err) => {
+        console.log('error creating new user',err)
         throw err
-      }
-      console.log('success! saved new user')
-      return done(null, newUser)
-    })
+      })
   }
 
   passport.use('local-onboard', new localStrategy(
@@ -153,38 +171,12 @@ module.exports = (passport, authMongoose, dataMongoose) => {
           return done(null, false, req.flash('signupMessage', 
             'A user has already been created with that email.'))
         } else {
-            console.log('attempting to save new user')
-            createVolUser(req, email, password, done)
-            let newVolDoc = new VolDataDoc()
-            newVolDoc.initDoc(email, phone, false, (err, docs) => {
-              if (err) {
-                console.log('error initializing new vol doc: ',err)
-                throw err
-              } else {
-                console.log('successfully created new vol doc: ',docs)
-              }
-            })
-            // let newUser = new UserAccount()
-            // newUser.local.email = email
-            // newUser.local.password = newUser.generateHash(password)
-            // // save new user to auth DB
-            // newUser.save(function(err){
-            //   if (err) {
-            //     console.log('error saving new user: ',err)
-            //     throw err
-            //   }
-            //   console.log('success! saved new user')
-            //   return done(null, newUser)
-            // })
-            // save new user to the volData database
-            // let newVolDoc = new VolDataDoc()
-            // newVolDoc.email = email
-            // newVolDoc.phone = req.body.phone
-
-
+            // user doesn't exist yet, proceeding to create new user
+            console.log('attempting to create and save new user')
+            createNewUser(email,password,phone,false,done)
         }
-      })
-    })
+      }) // -- end .findOne() looking for dupe acct 
+    }) // -- end localStrategy parameters
   ) // -- end onboard strategy
 
 

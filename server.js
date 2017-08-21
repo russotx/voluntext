@@ -99,12 +99,13 @@ app.use(session(sessOpts))
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(flash())
+/*
 app.use((req, res, next) => {
   console.log('mw | req.session = \n', req.session)
   console.log('------------')
   console.log('mw | req.user = \n', req.user)
   next()
-})
+}) */
 
 // --- set up router ---
 const router = express.Router()
@@ -119,18 +120,11 @@ app.use(router)
    res.redirect('/about')
  })
 
-process.on('SIGINT', function(){
-  authDBconnection.disconnecte(function(){
-    console.log('disconnected mongoose')
-    process.exit(0)
-  })
-})
 
 // listen for connections
 app.listen(process.env.PORT, (err)=>{
   if (err){
     console.log('Error starting Express')
-    authDBconnection.disconnect(function(){ console.log('closing DB')})
     return false
   } else {
     console.log('Express running on port',process.env.PORT)
