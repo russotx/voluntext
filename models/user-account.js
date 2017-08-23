@@ -54,19 +54,19 @@ userAccountSchema.methods.initUserAcct = function(email, password, callback) {
         'password': this.generateHash(password)
       }
     })
-    this.save(function(err){
+    this.save(function(err, doc){
       if (err) {
         console.log('error saving new user: ', err)
         if (callback){
-          rej(callback(false, err)) // pass the callback with err
+          rej(callback(err, null)) // pass the callback with err
         }
         rej(err) // pass the error code
       } else {
         console.log('success! saved new user')
         if (callback) {
-          res(callback(true)) // pass the callback
+          res(callback(null, doc)) // pass the callback
         }
-        res()
+        res(doc)
       }
     })
   })

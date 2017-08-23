@@ -20,6 +20,15 @@ require('dotenv').config()
 function newSessionId() {
   return cryptoRandomString(32)
 }
+
+function hoursConvert(hrs, unit='ms') {
+  let converted = hrs*3600
+  if (unit === 'ms') {
+    return converted*1000
+  }
+  return converted
+} 
+
 // if environment is dev use dev urls, otherwise use production urls
 const dbURL = (process.env.ENVIRONMENT === 'development') ? 
   {
@@ -44,14 +53,6 @@ let dataDBconnection = mongoose.createConnection(dbURL.volData)
   dataDBconnection.on('error', function(err){ console.log('voldata DB connection error: ',err) })
   dataDBconnection.on('close', function(){ console.log('voldata DB connection closed') })
 
-function hoursConvert(hrs, unit='ms') {
-  let converted = hrs*3600
-  if (unit === 'ms') {
-    return converted*1000
-  }
-  return converted
-} 
-
 const proxyLevels = 1
 const sessOpts = {
   cookie: {
@@ -60,14 +61,15 @@ const sessOpts = {
     secure: false, /* should set this to true on site with HTTPS! */
   },
   secret: process.env.SESSIONSECRET, /* used to sign */
-  name: 'connect.vtextSID', /* session ID cookie name in req */
+  name: 'connect.newSessID', /* session ID cookie name in req */
   resave: false, /* don't resave session if unchanged */
   saveUninitialized: false, /* new but unmodified sessions not saved */
+  unset: 'destroy', /* delete session when unset */
   /* the session store instance (default is MemoryStore) */
   store: new MongoStore( 
     { 
       mongooseConnection: authDBconnection, 
-      touchAfter: hoursConvert(6, 'sec'),
+      /*touchAfter: hoursConvert(6, 'sec'),*/
       collection: 'usersessions',
       ttl: hoursConvert(48, 'sec')
     } 
@@ -99,13 +101,6 @@ app.use(session(sessOpts))
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(flash())
-/*
-app.use((req, res, next) => {
-  console.log('mw | req.session = \n', req.session)
-  console.log('------------')
-  console.log('mw | req.user = \n', req.user)
-  next()
-}) */
 
 // --- set up router ---
 const router = express.Router()
@@ -119,7 +114,6 @@ app.use(router)
  app.get('*', (req,res) => {
    res.redirect('/about')
  })
-
 
 // listen for connections
 app.listen(process.env.PORT, (err)=>{

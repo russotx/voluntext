@@ -94,8 +94,7 @@ module.exports = (passport, authMongoose, dataMongoose) => {
   // pushes fn onto passport.serializers stack
   // determine what data from user object to save in session store to identify
   // a user without saving all of their information in session store
-  passport.serializeUser((user, done) => {
-    console.log('serializing user: ',user)
+  passport.serializeUser((user, done) => { 
     /* second done parameter gets saved as a property to 
        req.session.passport.user */
     done(null, user.local.email)
@@ -108,10 +107,8 @@ module.exports = (passport, authMongoose, dataMongoose) => {
      id from the session store
      first parameter is from req.session.passport.user */
   passport.deserializeUser((sessionUser, done) => {
-    console.log('deserializeUser id = ',sessionUser)
     UserAccount.findOne({ 'local.email' : sessionUser }, (err, sessionUser) => {
-      if (err) console.log('deserialize error: ',err)
-      console.log('deserializing user: ',sessionUser)
+      if (err) console.log('deserialize error: ',err) 
       /* pass control back to authenticate, sessionUser object gets attached 
          to request as req.user */
       done(err, sessionUser)
@@ -120,33 +117,42 @@ module.exports = (passport, authMongoose, dataMongoose) => {
 
   // ---- ONBOARD/SIGNUP LOGIC ----
 
-  function createNewUser(email, password, phone, smsOpt=false, done) {
+  function createNewUser(userProps, smsOpt=false, admin, done) {
     // create a new user account in the authentication database
     let newUser = new UserAccount()
     // create a new user document in the volunteer data database
     let newVolDoc = new VolDataDoc()
+    let email = userProps.email
+    let phone = userProps.phone
+    let password = userProps.password
     newUser.initUserAcct(email, password)
-      .then(newVolDoc.initDoc(email, phone, smsOpt)
+      // initUserAcct promise resolution
+      .then((doc) => {
+        newVolDoc.initDoc(email, phone, smsOpt)
         // initDoc promise resolution
-        .then(newUser.setUserId(newVolDoc.userId, (err) => {
-          if (err) { 
-            console.log('error setting userId: ',err)
-            throw err
-          } else {
-            console.log('total success creating new user')
-            done(null, newUser)
-          }
-        }))
+        .then((docs) => {
+          newUser.setUserId(newVolDoc.userId, (err) => {
+            if (err) { 
+              console.log('error setting userId: ', err)
+              throw { 'error': err, 'onboardMessage': 'failed to save userID in auth DB' }
+            } else {
+              console.log('total success creating new user')
+              // pass control back to Passport with admin as active user
+              done(null, admin)
+            }
+          })
+        })
         // initDoc promise rejection
         .catch((err) => {
           console.log('error initializing volunteer records: ',err)
-          throw err
+          throw { 'error':err, 'onboardMessage': 'failed to initialize user in vol data DB' }
         })
-      )
+      })
       // initUserAcct promise rejection
       .catch((err) => {
         console.log('error creating new user',err)
-        throw err
+        //return err
+        throw { 'error': err, 'onboardMessage': 'failed to create new user account in auth db' }
       })
   }
 
@@ -157,11 +163,15 @@ module.exports = (passport, authMongoose, dataMongoose) => {
       passReqToCallback: true
     },
     function(req, email, password, done){
-      let phone = req.body.phone
+      let userProps = {
+        'phone': req.body.phone,
+        'email': email,
+        'password': password
+      }
       console.log('new user:: email: ',email,' password: ',password)
       // look to see if email already exists in the DB
       UserAccount.findOne({ 'local.email' : email }, (err, user) => {
-        console.log('attempting to save new user')
+        console.log('begin save new user')
         if (err) {
           console.log('error with DB trying to check dupe email on signup: ', err)
           return done(err)
@@ -172,8 +182,15 @@ module.exports = (passport, authMongoose, dataMongoose) => {
             'A user has already been created with that email.'))
         } else {
             // user doesn't exist yet, proceeding to create new user
-            console.log('attempting to create and save new user')
-            createNewUser(email,password,phone,false,done)
+            console.log('attempting to create and save new user') 
+            // new user properties | sms opt-in | current user (admin) | done()
+            try { 
+              createNewUser(userProps,false,req.user,done)
+            } 
+            catch(err){
+              console.log('error creating new user: ', err.onboardMessage,'\n',err.err)
+              req.flash('onboardMessage',err.onboardMessage)
+            }
         }
       }) // -- end .findOne() looking for dupe acct 
     }) // -- end localStrategy parameters
@@ -196,24 +213,39 @@ module.exports = (passport, authMongoose, dataMongoose) => {
         @params: req, username, password, verified() || username, password, verified()
         verified is defined by passport-local: returns error, fail, or calls .success(user,info) */
     (req, email, password, done) => { 
+      console.log('req.session in login: \n',req.session || 'no session found')
+      if (req.session) {
+        req.session.flash = {}
+      }
       console.log('looking for user email account in DB')
       /* mongoose findOne method to locate the email entered by user */
       UserAccount.findOne({ 'local.email' : email }, (err, user) => {
-        console.log('the user: ', user.local.email)
         /* error with the database */
         if (err){ 
           console.log('error when trying to locate user email in DB.')
           return done(err)
         }
         /* can't locate the user email or the password doesn't match */
-        if ((!user) || (!user.validPassword(password))) {
-          console.log("no user found, or pwd didn't match")
+        if (!user) {
+          console.log("no user found")
           return done(null, false, req.flash('loginMessage', 
                                           'Invalid username/password'))
         }
-        /* found the user email and password matches
+        if (!user.validPassword(password)) {
+          console.log("pwd didn't match")
+          return done(null, false, req.flash('loginMessage', 
+                                          'Invalid username/password'))
+        } 
+        /* Here we found the user email and the password matches
             done() calls strategy.success(user, info)
-            passport-local doesn't provide a callback to .authenticate() so .success() calls req.login() */
+            passport-local doesn't provide a callback to .authenticate() so 
+              .success() calls req.logIn() 
+            req.logIn() does the following:
+              adds user{} to req.passport.session
+              adds req.passport.session{} to req.session 
+              runs the callback parameter passed to logIn()
+                which returns error, calls the res.redirect from options, 
+                or calls next() */
         console.log('success! found user account and password matched')
         return done(null, user)
       }) // -- end findOne callback

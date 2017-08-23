@@ -19,11 +19,6 @@ module.exports = (router, root) => {
     res.sendFile(path.join(root,'public','views','login2.html'))
   })
 
-  router.get('/onboard', (req, res, next)=>{
-    console.log('going to onboard page')
-    res.sendFile(path.join(root,'secured','views','onboard.html'))
-  })
-
   router.get('/favicon.ico', (req, res) => {
     res.status(204)
   })

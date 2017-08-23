@@ -62,7 +62,7 @@ volDataSchema.methods.initDoc = function(email, phone, smsOpt=false/*, callback*
           rej(err)
         } else {
           // return callback(null, docs)
-          res()
+          res(docs)
         }
       })
     })
