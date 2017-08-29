@@ -1,5 +1,5 @@
 
-/*-------------------------------------------------- 
+/* -------------------------------------------------- 
 Flow:
 ___ passport.authenticate()___
 1. * calls passport.authenticate()
@@ -95,7 +95,7 @@ module.exports = (passport, authMongoose, dataMongoose) => {
   // determine what data from user object to save in session store to identify
   // a user without saving all of their information in session store
   passport.serializeUser((user, done) => { 
-    /* second done parameter gets saved as a property to 
+    /* second done() parameter gets saved as a property to 
        req.session.passport.user */
     done(null, user.local.email)
   })
@@ -241,12 +241,18 @@ module.exports = (passport, authMongoose, dataMongoose) => {
             passport-local doesn't provide a callback to .authenticate() so 
               .success() calls req.logIn() 
             req.logIn() does the following:
-              adds user{} to req.passport.session
-              adds req.passport.session{} to req.session 
+              adds user{} to req._passport.session
+              adds req._passport.session{} to req.session[options.key || 'passport'] 
               runs the callback parameter passed to logIn()
                 which returns error, calls the res.redirect from options, 
                 or calls next() */
         console.log('success! found user account and password matched')
+        console.log('---')
+        if (req._passport) {
+          console.log('req.passport.session: \n',req._passport.session || 'none')
+        } else {
+          console.log('no req.passport')
+        }
         return done(null, user)
       }) // -- end findOne callback
     }) // -- end 'passport-local' constructor

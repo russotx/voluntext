@@ -46,8 +46,12 @@ module.exports = (router, passport, root) => {
              passport.authenticate('local-onboard', onboardOptions))
 
   router.get('/user/profile', (req,res) => {
-    console.log('going to user profile') 
-    res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'))
+    //res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'))
+    console.log('----- INSIDE USER PROFILE ROUTE ------')
+    console.log('going to user profile...') 
+    console.log('req.userId: ',req.userId || 'no req.userId')
+    res.sendFile(path.join(root, 'secured', 'views', 'ws-privtest.html'))
+    console.log('----- END USER PROFILE ROUTE ------')
   })                                              
 
   router.get('/admin/onboard', (req, res, next)=>{
@@ -83,7 +87,18 @@ function isLoggedIn(req, res, next) {
   if (req.session) { console.log('req.session = \n',req.session) }
     else { console.log('no req.session') } */
   if (req.isAuthenticated()) {
+    console.log('------ AUTH MESSAGES --------')
     console.log('auth check: user is logged in')
+    console.log('req.session: \n',req.session)
+    console.log('---')
+    if (req._passport) {
+      console.log('req.passport.session: \n',req._passport.session || 'none')
+    } else {
+      console.log('no req.passport')
+    }
+    console.log('---')
+    console.log('req.userId: ',req.userId || 'none')
+    console.log('-------- END AUTH MESSAGES -------')
     return next()
   } else {
     console.log("auth check: user hasn't logged in") 

@@ -11,10 +11,11 @@ module.exports = (router, root) => {
 
   router.get('/about', (req, res) => {
     console.log('going to landing page')
-    res.sendFile(path.join(root,'public','views','landing-page.html'))
+    //res.sendFile(path.join(root,'public','views','landing-page.html'))
+    res.sendFile(path.join(root,'public','views','ws-pubtest.html'))
   })
   
-  router.get('/login', (req, res, next)=>{
+  router.get('/login', (req, res, next) => {
     console.log('going to login page')
     res.sendFile(path.join(root,'public','views','login2.html'))
   })
