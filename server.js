@@ -182,7 +182,10 @@ const wsServer = new WebSocket.Server( wsOpts )
 wsServer.on('connection', (socket, req) => {
   console.log('SOCKET CONNECTION CREATED!!')
   socket.on('message', (message) => {
-    console.log('WS message: ${message} \n from user: ${req.session.userId}')
+    console.log(`WS message: ${message} \n from user: ${req.session.userId}`)
+  })
+  socket.on('close', (code, reason) => {
+    console.log(`Socket closed: ${code} for: ${reason}`)
   })
   socket.send('hello from voluntext')
 })
@@ -196,8 +199,10 @@ wsServer.on('listening', () => {
 wsServer.on('open', () => {
   console.log('websocket connection opened')
 })
-
-// listen for connections
+wsServer.on('close', () => {
+  console.log('websocket connection closed')
+})
+// listen for connections .
 httpServer.listen(process.env.PORT, (err) => {
   if (err) {
     console.log('error starting http server')
