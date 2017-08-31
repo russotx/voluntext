@@ -83,9 +83,6 @@ function isAdmin(req, res, next) {
 }
 
 function isLoggedIn(req, res, next) {
-  /*if (req.user) console.log('req.user = \n',req.user)
-  if (req.session) { console.log('req.session = \n',req.session) }
-    else { console.log('no req.session') } */
   if (req.isAuthenticated()) {
     console.log('------ AUTH MESSAGES --------')
     console.log('auth check: user is logged in')

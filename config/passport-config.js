@@ -81,12 +81,11 @@ ___ Subsequent Requests ___
 const localStrategy = require('passport-local').Strategy
 
 // configure passport 
-module.exports = (passport, authMongoose, dataMongoose) => {
-  // get mongoose models and pass in mongoose connection to auth db
+module.exports = (passport) => {
   // DB with user accounts for authentication
-  const UserAccount = require('../models/user-account')(authMongoose)
+  const UserAccount = require('../models/user-account')
   // DB with volunteer data corresponding to users
-  const VolDataDoc = require('../models/voldata-db')(dataMongoose)
+  const VolDataDoc = require('../models/voldata-db')
 
   // ---- SESSION MANAGEMENT ----
 

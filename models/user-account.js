@@ -3,7 +3,8 @@ const bcrypt = require('bcrypt')
 const saltRounds = 5
 // set native promises as mongoose preferred promise library
 mongoose.Promise = global.Promise
-
+// import mongoose connection to authentication & session database
+const authDBconnection = require('../config/mongoose-config').authDBconn
 const Schema = mongoose.Schema
 
 let userAccountSchema = new Schema({
@@ -72,9 +73,5 @@ userAccountSchema.methods.initUserAcct = function(email, password, callback) {
   })
 }
 
-// receive mongoose auth db connection and export model
-module.exports = function(authMongoose) {
-
-  return authMongoose.model('UserAccount', userAccountSchema)
-
-}
+// export the model for the user account for authentication purposes
+module.exports = authDBconnection.model('UserAccount', userAccountSchema)

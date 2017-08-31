@@ -2,7 +2,8 @@ const mongoose = require('mongoose')
 const moment = require('moment')
 const bcrypt = require('bcrypt')
 mongoose.Promise = global.Promise
-
+// import mongoose connection to volunteer data database 
+const dataDBconnection = require('../config/mongoose-config').dataDBconn
 const Schema = mongoose.Schema
 
 let logEntrySchema = new Schema({
@@ -68,6 +69,5 @@ volDataSchema.methods.initDoc = function(email, phone, smsOpt=false/*, callback*
     })
 }
 
-module.exports = function(dataMongoose) {
-  return dataMongoose.model('VolDataDoc', volDataSchema)
-}
+// export the model for storing volunteer related data
+module.exports = dataDBconnection.model('VolDataDoc', volDataSchema)

@@ -3,7 +3,7 @@ const wsMessages = document.getElementById('ws-messages');
 let ws;
 
 function showMessage(message) {
-  wsMessages.textContent += message;
+  wsMessages.textContent += message+'\n';
 }
 
 function startConnection() {
@@ -14,6 +14,17 @@ function startConnection() {
     ws.onerror = () => showMessage('WebSocket error');
     ws.onopen = () => showMessage('WebSocket connection established');
     ws.onclose = () => showMessage('WebSocket connection closed');
+    ws.onmessage = (msg) => { 
+      // data = data sent
+      // origin = origin (uri) of the message emitter
+      // lastEventId = unique ID for the event
+      // ports = array of MessagePort objects for the channel
+      new Promise((res,rej) => {
+        let message = msg.data + ' \n ' + msg.origin;
+        res(showMessage(message));
+      })
+      .then(ws.send('client: message received!'))
+    }
   }
 
 }
