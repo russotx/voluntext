@@ -19,7 +19,6 @@ const onboardOptions = {
   failureFlash: true
 }
 
-
 module.exports = (router, passport, root) => {
 
   router.use('/user',isLoggedIn)
@@ -69,8 +68,6 @@ module.exports = (router, passport, root) => {
 
 function isAdmin(req, res, next) {
   if (req.user) console.log('admin check: req.user = \n', req.user)
-  if (req.session) { console.log('admin check: req.session = \n', req.session) }
-    else { console.log('no req.session') }
   if (req.isAuthenticated() && (req.user.userId === process.env.ADMINID)) {
     console.log('user is admin')
     return next()
@@ -85,21 +82,10 @@ function isAdmin(req, res, next) {
 
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) {
-    console.log('------ AUTH MESSAGES --------')
     console.log('auth check: user is logged in')
-    console.log('req.session: \n',req.session)
-    console.log('---')
-    if (req._passport) {
-      console.log('req.passport.session: \n',req._passport.session || 'none')
-    } else {
-      console.log('no req.passport')
-    }
-    console.log('---')
-    console.log('req.userId: ',req.userId || 'none')
-    console.log('-------- END AUTH MESSAGES -------')
     return next()
   } else {
-    console.log("auth check: user hasn't logged in") 
+    console.log("auth check: user hasn't logged in, redirect to /about") 
     res.redirect('/about')
   }
 }

@@ -98,7 +98,8 @@ module.exports = (passport) => {
   passport.serializeUser((user, done) => { 
     /* second done() parameter gets saved as a property to 
        req.session.passport.user */
-    done(null, user.local.email)
+    //done(null, user.local.email)
+    done(null, user.userId)
   })
 
   /* pushes fn parameter onto passport.deserializers stack
@@ -106,14 +107,18 @@ module.exports = (passport) => {
 
      callback defines logic to pull user info from the user DB based on
      id from the session store
-     first parameter is from req.session.passport.user */
+     first parameter is from req.session.passport.user which comes from serializeUser */
   passport.deserializeUser((sessionUser, done) => {
-    UserAccount.findOne({ 'local.email' : sessionUser }, (err, sessionUser) => {
-      if (err) console.log('deserialize error: ',err) 
-      /* pass control back to authenticate, sessionUser object gets attached 
-         to request as req.user */
-      done(err, sessionUser)
-    })
+    // UserAccount.findOne({ 'local.email' : sessionUser }, (err, sessionUser) => {
+    //   if (err) console.log('deserialize error: ',err) 
+    //   /* pass control back to authenticate, sessionUser object gets attached 
+    //      to request as req.user */
+    //   done(err, sessionUser)
+    // })
+      UserAccount.findOne({ 'userId': sessionUser }, (err, sessionUser) => {
+        if (err) console.log('deserialize error: ', err)
+          else done(err, sessionUser)
+      })
   })
 
   // ---- ONBOARD/SIGNUP LOGIC ----
@@ -241,11 +246,11 @@ module.exports = (passport) => {
             passport-local doesn't provide a callback to .authenticate() so 
               .success() calls req.logIn() 
             req.logIn() does the following:
-              - adds user{} to req._passport.session
-              - adds req._passport.session{} to req.session[options.key || 'passport'] 
-              - runs the callback parameter passed to logIn()
-                which either returns error, calls the res.redirect from options, 
-                or calls next() */
+              1. adds user{} data to req._passport.session based on serializeUser
+              2. adds req._passport.session{} to req.session[options.key || 'passport'] 
+              3. runs the callback parameter passed to logIn()
+                  which either returns error, calls the res.redirect from options, 
+                  or calls next() */
         console.log('success! found user account and password matched')
         return done(null, user)
       }) // -- end findOne callback
