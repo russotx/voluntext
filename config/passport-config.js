@@ -79,6 +79,8 @@ ___ Subsequent Requests ___
 --------------------------------------------------*/
 
 const localStrategy = require('passport-local').Strategy
+const facebookStrategy = require('passport-facebook').Strategy
+require('dotenv').config()
 
 // configure passport 
 module.exports = (passport) => {
@@ -197,9 +199,9 @@ module.exports = (passport) => {
 
 
   // ---- AUTHENTICATION STRATEGIES ----
-  // define local login authentication strategy using passport-local module
-  // new strategy overrides the passport.Strategy.authenticate method
-  // strategy name: "local-login"
+  // `new strategy` overrides the passport.Strategy.authenticate method  
+
+  // -- Local Strategy --
   passport.use('local-login', new localStrategy(
     /* strategy options parameter */
     {
@@ -212,11 +214,10 @@ module.exports = (passport) => {
         @params: req, username, password, verified() || username, password, verified()
         verified is defined by passport-local: returns error, fail, or calls .success(user,info) */
     (req, email, password, done) => { 
-      console.log('req.session in login: \n',req.session || 'no session found')
       if (req.session) {
         req.session.flash = {}
       }
-      console.log('looking for user email account in DB')
+      console.log('local login: looking for user email account in DB')
       /* mongoose findOne method to locate the email entered by user */
       UserAccount.findOne({ 'local.email' : email }, (err, user) => {
         /* error with the database */
@@ -240,21 +241,32 @@ module.exports = (passport) => {
             passport-local doesn't provide a callback to .authenticate() so 
               .success() calls req.logIn() 
             req.logIn() does the following:
-              adds user{} to req._passport.session
-              adds req._passport.session{} to req.session[options.key || 'passport'] 
-              runs the callback parameter passed to logIn()
-                which returns error, calls the res.redirect from options, 
+              - adds user{} to req._passport.session
+              - adds req._passport.session{} to req.session[options.key || 'passport'] 
+              - runs the callback parameter passed to logIn()
+                which either returns error, calls the res.redirect from options, 
                 or calls next() */
         console.log('success! found user account and password matched')
-        console.log('---')
-        if (req._passport) {
-          console.log('req.passport.session: \n',req._passport.session || 'none')
-        } else {
-          console.log('no req.passport')
-        }
         return done(null, user)
       }) // -- end findOne callback
     }) // -- end 'passport-local' constructor
   )// -- end middleware
+
+  // -- Facebook Strategy --
+  /*
+  passport.use('facebook', new facebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
+    callbackURL: 'http://localhost:3000/auth/facebook/callback'
+  },
+  (accessToken, refreshToken, profile, done) => {
+    let userEmail = profile.emails[0].value
+    UserAccount.findOne( { 'facebook.email': userEmail }, (err, user) => {
+      
+    })
+  }
+))
+*/
+
 
 } // end of module.exports
