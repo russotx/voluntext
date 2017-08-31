@@ -13,9 +13,9 @@ const express = require('express')
 const passport = require('passport')
 require('./passport-config')(passport)
 
-const proxyLevels = 1
-
 const sessionParser = require('./sessions-config')
+
+const proxyLevels = 1
 
 module.exports = (app, root) => {
  
