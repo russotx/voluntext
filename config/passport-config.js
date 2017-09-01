@@ -80,21 +80,22 @@ ___ Subsequent Requests ___
 
 const localStrategy = require('passport-local').Strategy
 const facebookStrategy = require('passport-facebook').Strategy
+// DB with user accounts for authentication
+const UserAccount = require('../models/user-account')
+// DB with volunteer data corresponding to users
+const VolDataDoc = require('../models/voldata-db')
+
 require('dotenv').config()
 
 // configure passport 
 module.exports = (passport) => {
-  // DB with user accounts for authentication
-  const UserAccount = require('../models/user-account')
-  // DB with volunteer data corresponding to users
-  const VolDataDoc = require('../models/voldata-db')
 
   // ---- SESSION MANAGEMENT ----
 
   // @params: fn | req | done
   // pushes fn onto passport.serializers stack
   // determine what data from user object to save in session store to identify
-  // a user without saving all of their information in session store
+  // a user (no need to save all of their information in the session store)
   passport.serializeUser((user, done) => { 
     /* second done() parameter gets saved as a property to 
        req.session.passport.user */
@@ -105,19 +106,15 @@ module.exports = (passport) => {
   /* pushes fn parameter onto passport.deserializers stack
      deserializers grab the user object out of the session for further use.
 
-     callback defines logic to pull user info from the user DB based on
-     id from the session store
+     callback defines logic to pull user object from the user DB based on
+     id from the session store. 
      first parameter is from req.session.passport.user which comes from serializeUser */
   passport.deserializeUser((sessionUser, done) => {
-    // UserAccount.findOne({ 'local.email' : sessionUser }, (err, sessionUser) => {
-    //   if (err) console.log('deserialize error: ',err) 
-    //   /* pass control back to authenticate, sessionUser object gets attached 
-    //      to request as req.user */
-    //   done(err, sessionUser)
-    // })
       UserAccount.findOne({ 'userId': sessionUser }, (err, sessionUser) => {
         if (err) console.log('deserialize error: ', err)
-          else done(err, sessionUser)
+          /* pass control back to authenticate, sessionUser object gets attached 
+            to request as req.user */
+          else done(null, sessionUser)
       })
   })
 
@@ -241,12 +238,12 @@ module.exports = (passport) => {
           return done(null, false, req.flash('loginMessage', 
                                           'Invalid username/password'))
         } 
-        /* Here we found the user email and the password matches
+        /*  user email and the password matches
             done() calls strategy.success(user, info)
             passport-local doesn't provide a callback to .authenticate() so 
               .success() calls req.logIn() 
             req.logIn() does the following:
-              1. adds user{} data to req._passport.session based on serializeUser
+              1. adds user{} data to req._passport.session based on serializeUser()
               2. adds req._passport.session{} to req.session[options.key || 'passport'] 
               3. runs the callback parameter passed to logIn()
                   which either returns error, calls the res.redirect from options, 
@@ -258,20 +255,31 @@ module.exports = (passport) => {
   )// -- end middleware
 
   // -- Facebook Strategy --
-  /*
+  
   passport.use('facebook', new facebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: 'http://localhost:3000/auth/facebook/callback'
+    callbackURL: 'http://localhost:3000/api/auth/facebook/proceed',
+    enableProof: true
   },
   (accessToken, refreshToken, profile, done) => {
-    let userEmail = profile.emails[0].value
-    UserAccount.findOne( { 'facebook.email': userEmail }, (err, user) => {
-      
+    console.log('fb profile: \n',profile || 'no profile')
+    console.log('fb id: ',profile.id)
+    let fbId = profile.id
+    UserAccount.findOne( { 'facebook.id': fbId }, (err, user) => {
+      if (err) { 
+        console.log('facebook: error with user account DB')  
+        done(err)
+      } else if (!user) {
+        console.log('facebook: user invalid')
+        done(null,false)
+      } else {
+        console.log('facebook: user logged in')
+        done(null, user)
+      }
     })
   }
 ))
-*/
 
 
 } // end of module.exports

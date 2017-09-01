@@ -18,9 +18,14 @@ const onboardOptions = {
   failureRedirect: '/admin/onboard',
   failureFlash: true
 }
+const facebookOptions = {
+  successRedirect: '/user/profile',
+  failureRedirect: '/login'
+}
 
 module.exports = (router, passport, root) => {
 
+  // -- ROUTER MIDDLEWARE --
   router.use('/user',isLoggedIn)
   router.use('/admin',isAdmin)
 
@@ -32,6 +37,25 @@ module.exports = (router, passport, root) => {
     } else {
       res.redirect('/user/profile')
     }
+  })
+
+  // Facebook Authentication Route
+  router.get('/api/auth/facebook', passport.authenticate('facebook'))
+  // Facebook Authentication Redirect Route
+  // callback for facebook strategy is called here- finds user associated with fbook account
+  router.get('/api/auth/facebook/proceed', 
+             passport.authenticate('facebook', facebookOptions))
+
+  router.get('/test/profile', (req,res) => {
+    //res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'))
+    console.log('----- FACEBOOK TEST: INSIDE USER PROFILE ROUTE ------')
+    console.log('going to user profile...') 
+    if (req._passport) console.log('req._passport: \n',req._passport)
+      else console.log('no req._passport')
+    if (req.session) console.log('req.session.passport: ',req.session.passport || 'no session.passport')
+      else console.log('no session')
+    res.sendFile(path.join(root, 'secured', 'views', 'ws-privtest.html'))
+    console.log('----- END FACEBOOK TEST USER PROFILE ROUTE ------')
   })
 
   router.get('/logout', (req, res) => {
@@ -48,8 +72,10 @@ module.exports = (router, passport, root) => {
     //res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'))
     console.log('----- INSIDE USER PROFILE ROUTE ------')
     console.log('going to user profile...') 
-    console.log('req._passport: \n',req._passport)
-    console.log('req.session.passport: ',req.session.passport)
+    if (req._passport) console.log('req._passport: \n',req._passport)
+      else console.log('no req._passport')
+    if (req.session) console.log('req.session.passport: ',req.session.passport || 'no session.passport')
+      else console.log('no session')
     res.sendFile(path.join(root, 'secured', 'views', 'ws-privtest.html'))
     console.log('----- END USER PROFILE ROUTE ------')
   })                                              
@@ -81,6 +107,7 @@ function isAdmin(req, res, next) {
 }
 
 function isLoggedIn(req, res, next) {
+  // checks if req.user exists
   if (req.isAuthenticated()) {
     console.log('auth check: user is logged in')
     return next()
