@@ -259,24 +259,31 @@ module.exports = (passport) => {
   passport.use('facebook', new facebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
+    /* url for facebook to send client after authentication on FB's end */
     callbackURL: 'http://localhost:3000/api/auth/facebook/proceed',
     enableProof: true
   },
+  /* Facebook returns some of the user's profile information
+     Passport handles token verification and normalizes user profile into
+     easily parsed object     */
   (accessToken, refreshToken, profile, done) => {
     console.log('fb profile: \n',profile || 'no profile')
     console.log('fb id: ',profile.id)
     let fbId = profile.id
+    /* Check user account DB for the user's facebook ID, if match
+      is found the user can proceed as authenticated, otherwise the user is
+      redirected to the failure option set at the route */
     UserAccount.findOne( { 'facebook.id': fbId }, (err, user) => {
       if (err) { 
         console.log('facebook: error with user account DB')  
-        done(err)
-      } else if (!user) {
+        return done(err)
+      } 
+      if (!user) {
         console.log('facebook: user invalid')
-        done(null,false)
-      } else {
-        console.log('facebook: user logged in')
-        done(null, user)
-      }
+        return done(null,false)
+      } 
+      console.log('facebook: user logged in')
+      return done(null, user)
     })
   }
 ))
