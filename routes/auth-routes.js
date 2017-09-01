@@ -6,6 +6,7 @@ Authentication & protected routes
 
 const path = require('path')
 require('dotenv').config()
+const UserAccount = require('../models/user-account')
 
 /* options for .allFailed() or .success()--req.login()*/
 const authOptions = {
@@ -29,7 +30,9 @@ module.exports = (router, passport, root) => {
   router.use('/user',isLoggedIn)
   router.use('/admin',isAdmin)
 
-  // User Authentication Route
+  // -- AUTHENTICATION ROUTES --
+
+  // Local User/Password Authentication Route
   router.post('/api/auth', passport.authenticate('local-login', authOptions), 
              (req, res) => {
     if (req.user.userId === process.env.ADMINID) {
@@ -58,6 +61,7 @@ module.exports = (router, passport, root) => {
     console.log('----- END FACEBOOK TEST USER PROFILE ROUTE ------')
   })
 
+  // -- User Logout Route --
   router.get('/logout', (req, res) => {
     console.log('logging out')
     req.logout()
@@ -65,9 +69,9 @@ module.exports = (router, passport, root) => {
     res.redirect('/about')
   })
 
-  router.post('/admin/api/onboard', 
-             passport.authenticate('local-onboard', onboardOptions))
+  // -- VOLUNTEER USER ROUTES --
 
+  // -- Volunteer Profile Page --
   router.get('/user/profile', (req,res) => {
     //res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'))
     console.log('----- INSIDE USER PROFILE ROUTE ------')
@@ -80,17 +84,29 @@ module.exports = (router, passport, root) => {
     console.log('----- END USER PROFILE ROUTE ------')
   })                                              
 
+  // -- ADMIN ROUTES --
+
+  // -- Admin Onboarding Volunteers Route -- 
+  router.post('/admin/api/onboard', (req, res)=>{
+    // !!!! MAKING CHANGES HERE !!!!
+    UserAccount.onboardUser(req)
+  })
+  
+  // -- Admin Volunteer Onboarding Page --
   router.get('/admin/onboard', (req, res, next)=>{
     console.log('going to onboard page')
     res.sendFile(path.join(root,'secured','views','onboard.html'))
   })
 
+  // -- Admin Dashboard Page --
   router.get('/admin/dashboard', (req, res) => {
     console.log('going to admin page')
     res.sendFile(path.join(root, 'secured', 'views', 'admin-page.html'))
   })
 
 }
+
+// -- MIDDLEWARE FUNCTIONS FOR ROUTES --
 
 function isAdmin(req, res, next) {
   if (req.user) console.log('admin check: req.user = \n', req.user)

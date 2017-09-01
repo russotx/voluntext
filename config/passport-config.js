@@ -161,15 +161,14 @@ module.exports = (passport) => {
 
   passport.use('local-onboard', new localStrategy(
     {
-      usernameField: 'email',
-      passwordField: 'password',
       passReqToCallback: true
     },
-    function(req, email, password, done){
+    function(req, done){
       let userProps = {
         'phone': req.body.phone,
-        'email': email,
-        'password': password
+        'email': req.body.email,
+        'password1': req.body.password1,
+        'password2': req.body.password2
       }
       console.log('new user:: email: ',email,' password: ',password)
       // look to see if email already exists in the DB

@@ -47,6 +47,10 @@ userAccountSchema.methods.setUserId = function(userId, callback){
   })
 }
 
+userAccountSchema.methods.onboardUser = function(){
+  // !!! MAKING CHANGES HERE !!!
+}
+
 userAccountSchema.methods.initUserAcct = function(email, password, callback) {
   return new Promise((res,rej) => {
     this.set({
