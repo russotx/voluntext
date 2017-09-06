@@ -119,7 +119,7 @@ module.exports = (passport) => {
   })
 
   // ---- ONBOARD/SIGNUP LOGIC ----
-
+/*
   function createNewUser(userProps, smsOpt=false, admin, done) {
     // create a new user account in the authentication database
     let newUser = new UserAccount()
@@ -197,7 +197,7 @@ module.exports = (passport) => {
       }) // -- end .findOne() looking for dupe acct 
     }) // -- end localStrategy parameters
   ) // -- end onboard strategy
-
+*/
 
   // ---- AUTHENTICATION STRATEGIES ----
   // `new strategy` overrides the passport.Strategy.authenticate method  

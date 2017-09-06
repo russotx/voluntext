@@ -41,7 +41,7 @@ volDataSchema.methods.logHours = function(hours) {
   })  
 }
 
-volDataSchema.methods.initDoc = function(email, phone, smsOpt=false/*, callback*/){
+volDataSchema.methods.initDoc = function(email, phone, smsOpt=false){
     let timeStamp = newTimeStamp()
     return new Promise((res,rej) => {
       this.set({
@@ -58,11 +58,11 @@ volDataSchema.methods.initDoc = function(email, phone, smsOpt=false/*, callback*
       })
       this.save(function(err, docs) {
         if (err) {
+          err.newUserStep = 2
+          err.stepMessage = 'Error initializing the volunteer doc in vol data DB.'
           console.log(err)
-          // return callback(err, null)
           rej(err)
         } else {
-          // return callback(null, docs)
           res(docs)
         }
       })

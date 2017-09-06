@@ -3,6 +3,7 @@ const pwd1 = document.getElementById('pwd1-field');
 const pwd2 = document.getElementById('pwd2-field');
 const phone = document.getElementById('phone-field');
 const submit = document.getElementById('submit-btn');
+const messages = document.getElementById('messages');
 
 function validateEmail(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -30,21 +31,33 @@ function validateOnboard() {
     }
     res({
       email : email.value,
-      pwd1 : pwd1.value,
-      pwd2 : pwd2.value,
+      password1 : pwd1.value,
+      password2 : pwd2.value,
       phone : phone.value
     })
   })  
 }
 
-submit.addEvenListener('click',(event) => {
+submit.addEventListener('click',(event) => {
   event.preventDefault();
   validateOnboard()
-    .then((onboardData)=>{
-      axios.post('/admin/api/onboard',onboardData)
+  /* valid user data */
+  .then((onboardData)=>{
+    axios.post('/admin/api/onboard',onboardData)
+    .then((result) => {
+      console.log(result)
+      return true;
     })
-    .catch()
-  
-    
-    
+    .catch((err) => {
+      console.log('error submitting user data');
+      messages.textContent = "error submitting user data";
+      return false;
+    })
+  })
+  /* invalid user data catch */
+  .catch((err)=>{
+    console.log('user data invalid', err)
+    messages.textContent = "User data invalid. \n "+err;
+    return false
+  })
 })

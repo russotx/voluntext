@@ -5,6 +5,7 @@ const saltRounds = 5
 mongoose.Promise = global.Promise
 // import mongoose connection to authentication & session database
 const authDBconnection = require('../config/mongoose-config').authDBconn
+const VolDataDoc = require('../models/voldata-db')
 const Schema = mongoose.Schema
 
 let userAccountSchema = new Schema({
@@ -33,23 +34,22 @@ userAccountSchema.methods.validPassword = function(password) {
 
 userAccountSchema.methods.setUserId = function(userId, callback){
   this.set( { 'userId': userId } )
-  this.save(function(err){
+  this.save(function(err, doc){
     if (err) {
+      err.newUserStep = 3
+      err.stepMessage = 'Error creating user ID for user in the authentication DB.'
       if (callback) 
-        return callback(err)
-      return err
+        return callback(err) // pass the callback with err
+      return Promise.reject(err) // let newuser-config handle the error 
     }
     else {
       if (callback) 
-        return callback()
-      return true
+        return callback(doc) // pass the callback with err
+      return Promise.resolve( doc )
     }
   })
-}
 
-userAccountSchema.methods.onboardUser = function(){
-  // !!! MAKING CHANGES HERE !!!
-}
+} 
 
 userAccountSchema.methods.initUserAcct = function(email, password, callback) {
   return new Promise((res,rej) => {
@@ -62,6 +62,8 @@ userAccountSchema.methods.initUserAcct = function(email, password, callback) {
     this.save(function(err, doc){
       if (err) {
         console.log('error saving new user: ', err)
+        err.newUserStep = 2
+        err.stepMessage = 'Error when saving new user to authentication DB.'
         if (callback){
           rej(callback(err, null)) // pass the callback with err
         }
@@ -71,7 +73,7 @@ userAccountSchema.methods.initUserAcct = function(email, password, callback) {
         if (callback) {
           res(callback(null, doc)) // pass the callback
         }
-        res(doc)
+        res(doc) // pass the doc
       }
     })
   })

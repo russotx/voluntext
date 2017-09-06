@@ -7,16 +7,11 @@ Authentication & protected routes
 const path = require('path')
 require('dotenv').config()
 const UserAccount = require('../models/user-account')
+const onboardUser = require('../config/newuser-config')
 
 /* options for .allFailed() or .success()--req.login()*/
 const authOptions = {
-  //successRedirect: '/admin',
   failureRedirect: '/login',
-  failureFlash: true
-}
-const onboardOptions = {
-  successRedirect: '/admin/onboard',
-  failureRedirect: '/admin/onboard',
   failureFlash: true
 }
 const facebookOptions = {
@@ -34,13 +29,13 @@ module.exports = (router, passport, root) => {
 
   // Local User/Password Authentication Route
   router.post('/api/auth', passport.authenticate('local-login', authOptions), 
-             (req, res) => {
-    if (req.user.userId === process.env.ADMINID) {
-      res.redirect('/admin/dashboard')
-    } else {
-      res.redirect('/user/profile')
-    }
-  })
+    (req, res) => {
+      if (req.user.userId === process.env.ADMINID) {
+        res.redirect('/admin/dashboard')
+      } else {
+        res.redirect('/user/profile')
+      }
+    })
 
   // Facebook Authentication Route
   router.get('/api/auth/facebook', passport.authenticate('facebook'))
@@ -86,11 +81,14 @@ module.exports = (router, passport, root) => {
 
   // -- ADMIN ROUTES --
 
+  const onboardOptions = {
+    successRedirect: '/admin/onboard',
+    failureRedirect: '/admin/onboard',
+    failureFlash: true
+  }
+  
   // -- Admin Onboarding Volunteers Route -- 
-  router.post('/admin/api/onboard', (req, res)=>{
-    // !!!! MAKING CHANGES HERE !!!!
-    UserAccount.onboardUser(req)
-  })
+  router.post('/admin/api/onboard', onboardUser(onboardOptions))
   
   // -- Admin Volunteer Onboarding Page --
   router.get('/admin/onboard', (req, res, next)=>{

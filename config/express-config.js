@@ -9,7 +9,9 @@ const path = require('path') // Node path library
 const bodyParser = require('body-parser') // HTTP body parser
 const flash = require('connect-flash') // session messages
 const morgan = require('morgan') // auto logger
+
 const express = require('express')
+
 const passport = require('passport')
 require('./passport-config')(passport)
 
@@ -25,6 +27,7 @@ module.exports = (app, root) => {
   app.use(express.static(path.join(root,'public','css')))
   app.use(express.static(path.join(root,'public','javascript')))
   app.use(express.static(path.join(root,'public','images')))
+  app.use('/admin',express.static(path.join(root,'secured','javascript')))
   // -- parsers and loggers middleware
   app.use(morgan('dev'))
   app.use(bodyParser.urlencoded({ extended: true }))
