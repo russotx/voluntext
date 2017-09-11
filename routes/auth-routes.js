@@ -68,15 +68,15 @@ module.exports = (router, passport, root) => {
 
   // -- Volunteer Profile Page --
   router.get('/user/profile', (req,res) => {
-    //res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'))
-    console.log('----- INSIDE USER PROFILE ROUTE ------')
-    console.log('going to user profile...') 
-    if (req._passport) console.log('req._passport: \n',req._passport)
-      else console.log('no req._passport')
-    if (req.session) console.log('req.session.passport: ',req.session.passport || 'no session.passport')
-      else console.log('no session')
-    res.sendFile(path.join(root, 'secured', 'views', 'ws-privtest.html'))
-    console.log('----- END USER PROFILE ROUTE ------')
+    res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'))
+    // console.log('----- INSIDE USER PROFILE ROUTE ------')
+    // console.log('going to user profile...') 
+    // if (req._passport) console.log('req._passport: \n',req._passport)
+    //   else console.log('no req._passport')
+    // if (req.session) console.log('req.session.passport: ',req.session.passport || 'no session.passport')
+    //   else console.log('no session')
+    // res.sendFile(path.join(root, 'secured', 'views', 'ws-privtest.html'))
+    //console.log('----- END USER PROFILE ROUTE ------')
   })                                              
 
   // -- ADMIN ROUTES --

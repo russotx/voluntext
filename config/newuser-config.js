@@ -47,7 +47,7 @@ function createNewUser(props, smsOpt=false) {
 // validate new user data again on server side
 function validateOnboard(props) {
   function validateEmail(email) {
-      var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
   }
   let email = props.email
@@ -101,7 +101,7 @@ module.exports = (options) => {
         err.stepMessage = 'error with DB trying to check dupe email on signup'
         //handler(err)
         //rej(err)
-        req.flash('onboardMessage',err.stepMessage)
+        if (failureFlash) req.flash('onboardMessage',err.stepMessage)
         res.redirect(failureRedirect)
         next()
       }
@@ -109,7 +109,7 @@ module.exports = (options) => {
         console.log('email already exists')
         /*handler(null, user, req.flash('signupMessage', 
           'A user has already been created with that email.'))*/
-        req.flash('onboardMessage','user already exists with this email: '+userProps.email)
+        if (failureFlash) req.flash('onboardMessage','user already exists with this email: '+userProps.email)
         res.redirect(failureRedirect)
         next()
       } 
@@ -129,14 +129,15 @@ module.exports = (options) => {
         .catch((err) => {
           console.log('error creating new user: ', err.stepMessage,'\n',err)
           /* handleNewUserErrors().then().catch() */
-          req.flash('onboardMessage',err.stepMessage)
+          if (failureFlash) req.flash('onboardMessage',err.stepMessage)
           res.redirect(failureRedirect)
           next()
         }) // -- end createNewUser .catch
       }) // -- end validateOnboard .then
       .catch((err) => {
         console.log('error with user data \n',err)
-        res.json(err)
+        if(failureFlash) req.flash('onboardMessage', 'error with user data')
+        res.redirect(failureRedirect)
       })
     }) // -- end .findOne() looking for dupe acct 
   } // end returned middleware function

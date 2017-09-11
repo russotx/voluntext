@@ -27,7 +27,7 @@ module.exports = (app, root) => {
   app.use(express.static(path.join(root,'public','css')))
   app.use(express.static(path.join(root,'public','javascript')))
   app.use(express.static(path.join(root,'public','images')))
-  app.use('/admin',express.static(path.join(root,'secured','javascript')))
+  //app.use('/admin',express.static(path.join(root,'secured','javascript')))
   // -- parsers and loggers middleware
   app.use(morgan('dev'))
   app.use(bodyParser.urlencoded({ extended: true }))

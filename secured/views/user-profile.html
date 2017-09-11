@@ -8,8 +8,16 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <!-- custom stylesheet -->
   <link rel="stylesheet" type="text/css" href="/admin-page.css">
+  <meta property="fb:app_id" content="2360172457541198">
+  <!-- <meta property="og:url" content="http://www.casatravis.org"> -->
+  <meta property="og:type" content="article">
+  <!-- <meta property="og:title" content="Hey I volunteered!"> -->
+  <!-- <meta property="og:description" content="learn more here"> -->
+  <!-- <meta property="og:image" content="http://www.casatravis.org/images/template/logo-300x.png"> -->
 </head>
 <body class="container-fluid">
+  <!-- Facebook SDK -->
+  
 
   <header class="row">
     <h1>"Welcome to the User Profile Page"</h1>
@@ -24,10 +32,15 @@
 
     <!-- Primary content -->
     <section class="col-md-12">
-
-
+      <p id="new-vol-hours" class="fb-quotable">Hey I volunteered X hours!</p>
+      <div id="fb-quote" class="fb-quote" data-layout="quote"></div>
+      <button id="fb-pub-btn" type="button">Post Hours To Facebook!</button>
+      <pre id="fb-res-msg"style="overflow: scroll; height: 100px; width: 75%;"></pre>
     </section>
-
+    <section class="col-md-12">
+      <button id="ws-button" type="button">Open WebSocket</button>
+      <pre id="ws-messages"style="overflow: scroll; height: 100px; width: 75%;"></pre>
+    </section>
       <!-- no more content past this piont -->
   </main>
 
@@ -37,6 +50,8 @@
     <p>&copy;Copyright 2017 Daniel Russo</p>
   </div>
 </footer>
-
+<script src='/facebook-sdk.js'></script>
+<script src="/ws-apptest.js"></script>
+<script src="/facebook-actions.js"></script>
 </body>
 </html>

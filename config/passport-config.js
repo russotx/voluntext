@@ -118,87 +118,6 @@ module.exports = (passport) => {
       })
   })
 
-  // ---- ONBOARD/SIGNUP LOGIC ----
-/*
-  function createNewUser(userProps, smsOpt=false, admin, done) {
-    // create a new user account in the authentication database
-    let newUser = new UserAccount()
-    // create a new user document in the volunteer data database
-    let newVolDoc = new VolDataDoc()
-    let email = userProps.email
-    let phone = userProps.phone
-    let password = userProps.password
-    newUser.initUserAcct(email, password)
-      // initUserAcct promise resolution
-      .then((doc) => {
-        newVolDoc.initDoc(email, phone, smsOpt)
-        // initDoc promise resolution
-        .then((docs) => {
-          newUser.setUserId(newVolDoc.userId, (err) => {
-            if (err) { 
-              console.log('error setting userId: ', err)
-              throw { 'error': err, 'onboardMessage': 'failed to save userID in auth DB' }
-            } else {
-              console.log('total success creating new user')
-              // pass control back to Passport with admin as active user
-              done(null, admin)
-            }
-          })
-        })
-        // initDoc promise rejection
-        .catch((err) => {
-          console.log('error initializing volunteer records: ',err)
-          throw { 'error':err, 'onboardMessage': 'failed to initialize user in vol data DB' }
-        })
-      })
-      // initUserAcct promise rejection
-      .catch((err) => {
-        console.log('error creating new user',err)
-        //return err
-        throw { 'error': err, 'onboardMessage': 'failed to create new user account in auth db' }
-      })
-  }
-
-  passport.use('local-onboard', new localStrategy(
-    {
-      passReqToCallback: true
-    },
-    function(req, done){
-      let userProps = {
-        'phone': req.body.phone,
-        'email': req.body.email,
-        'password1': req.body.password1,
-        'password2': req.body.password2
-      }
-      console.log('new user:: email: ',email,' password: ',password)
-      // look to see if email already exists in the DB
-      UserAccount.findOne({ 'local.email' : email }, (err, user) => {
-        console.log('begin save new user')
-        if (err) {
-          console.log('error with DB trying to check dupe email on signup: ', err)
-          return done(err)
-        }
-        if (user) {
-          console.log('email already exists')
-          return done(null, false, req.flash('signupMessage', 
-            'A user has already been created with that email.'))
-        } else {
-            // user doesn't exist yet, proceeding to create new user
-            console.log('attempting to create and save new user') 
-            // new user properties | sms opt-in | current user (admin) | done()
-            try { 
-              createNewUser(userProps,false,req.user,done)
-            } 
-            catch(err){
-              console.log('error creating new user: ', err.onboardMessage,'\n',err.err)
-              req.flash('onboardMessage',err.onboardMessage)
-            }
-        }
-      }) // -- end .findOne() looking for dupe acct 
-    }) // -- end localStrategy parameters
-  ) // -- end onboard strategy
-*/
-
   // ---- AUTHENTICATION STRATEGIES ----
   // `new strategy` overrides the passport.Strategy.authenticate method  
 
@@ -282,6 +201,9 @@ module.exports = (passport) => {
         return done(null,false)
       } 
       console.log('facebook: user logged in')
+      /* TODO: save access token in the database
+
+      */
       return done(null, user)
     })
   }

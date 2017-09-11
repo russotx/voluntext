@@ -26,21 +26,6 @@ function newTimeStamp(){
   return now.format('MM,D,YYYY|HH|mm|ss')
 }
 
-volDataSchema.methods.logHours = function(hours) {
-  let timeStamp = newTimeStamp()
-  this.hoursLog.push({
-    'entryId': this.email + ':' + timeStamp,
-    'hours': hours,
-    'timeStamp': timeStamp
-  })
-  this.totalHours = this.totalHours + hours
-  this.save(function(err){
-    if (err) {
-      console.log('error saving hours')
-    }
-  })  
-}
-
 volDataSchema.methods.initDoc = function(email, phone, smsOpt=false){
     let timeStamp = newTimeStamp()
     return new Promise((res,rej) => {
@@ -68,6 +53,38 @@ volDataSchema.methods.initDoc = function(email, phone, smsOpt=false){
       })
     })
 }
+
+volDataSchema.methods.logHours = function(hours) {
+  // TODO: need to return a promise from this method
+  let timeStamp = newTimeStamp()
+  this.hoursLog.push({
+    'entryId': this.email + ':' + timeStamp,
+    'hours': hours,
+    'timeStamp': timeStamp
+  })
+  this.totalHours = this.totalHours + hours
+  this.save(function(err){
+    if (err) {
+      console.log('error saving hours')
+    }
+  })  
+}
+
+volDataSchema.methods.setSMSopt = function(option) {
+  return new Promise((res,rej) => {
+    this.set({ 'smsOpt': option })
+    this.save(function(err, doc){
+      if (err){
+        console.log('sms opt in error: ',err)
+        rej(err)
+      } else {
+        res(doc)
+      }
+    })
+  })
+}
+
+
 
 // export the model for storing volunteer related data
 module.exports = dataDBconnection.model('VolDataDoc', volDataSchema)
