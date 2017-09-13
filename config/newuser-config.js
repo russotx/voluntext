@@ -14,7 +14,7 @@ const VolDataDoc = require('../models/voldata-db')
 
 function createNewUser(props, smsOpt=false) {
   return new Promise((res, rej) => {
-    // create a new user account in the authentication database
+    // create a new user account document in the authentication database
     let newUser = new UserAccount()
     // create a new user document in the volunteer data database
     let newVolDoc = new VolDataDoc()

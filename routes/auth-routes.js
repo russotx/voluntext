@@ -6,8 +6,9 @@ Authentication & protected routes
 
 const path = require('path')
 require('dotenv').config()
-const UserAccount = require('../models/user-account')
+//const UserAccount = require('../models/user-account')
 const onboardUser = require('../config/newuser-config')
+const VolDataDoc = require('../models/voldata-db')
 
 /* options for .allFailed() or .success()--req.login()*/
 const authOptions = {
@@ -66,8 +67,9 @@ module.exports = (router, passport, root) => {
 
   // -- VOLUNTEER USER ROUTES --
 
-  // -- Volunteer Profile Page --
+  // -- Volunteer Profile Page 
   router.get('/user/profile', (req,res) => {
+    console.log('the user: ', req.user)
     res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'))
     // console.log('----- INSIDE USER PROFILE ROUTE ------')
     // console.log('going to user profile...') 
@@ -78,6 +80,32 @@ module.exports = (router, passport, root) => {
     // res.sendFile(path.join(root, 'secured', 'views', 'ws-privtest.html'))
     //console.log('----- END USER PROFILE ROUTE ------')
   })                                              
+
+  // -- Volunteer opt in/out of sms texting 
+  router.post('/user/api/sms-opt', (req, res) => {
+    console.log('payload: ', req.body)
+    console.log('user: ', req.user)
+    let userId = req.user.userId
+    console.log('userId: ', userId)
+    //let smsOption = req.body.smsChange.optIn
+    //console.log('smsOption: ', smsOption)
+    VolDataDoc.findOne( { 'userId': userId }, (err, userData) => {
+      if (err) {
+        console.log('error finding user data.')
+        res.json( { saved: false, error: err } )
+      } else {
+        console.log('user data found, attempting to save user data...')
+        userData.setSMSopt(true)
+        .then(() => { 
+          console.log('saved sms option')
+          res.json( { saved: true } )
+        })
+        .catch((err) => {
+          console.log('error saving sms change: \n', err)
+        })
+      }
+    })
+  })
 
   // -- ADMIN ROUTES --
 

@@ -5,7 +5,7 @@ const saltRounds = 5
 mongoose.Promise = global.Promise
 // import mongoose connection to authentication & session database
 const authDBconnection = require('../config/mongoose-config').authDBconn
-const VolDataDoc = require('../models/voldata-db')
+//const VolDataDoc = require('../models/voldata-db')
 const Schema = mongoose.Schema
 
 let userAccountSchema = new Schema({

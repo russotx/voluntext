@@ -83,7 +83,7 @@ const facebookStrategy = require('passport-facebook').Strategy
 // DB with user accounts for authentication
 const UserAccount = require('../models/user-account')
 // DB with volunteer data corresponding to users
-const VolDataDoc = require('../models/voldata-db')
+//const VolDataDoc = require('../models/voldata-db')
 
 require('dotenv').config()
 
