@@ -1,8 +1,4 @@
-/* 
-
-Authentication & protected routes 
-
-*/
+/****  Authentication & protected routes   *****/
 
 const path = require('path')
 require('dotenv').config()
@@ -20,13 +16,19 @@ const facebookOptions = {
   failureRedirect: '/login'
 }
 
+/*--------------------------------------------------
+                -- EXPORTS --
+--------------------------------------------------*/
 module.exports = (router, passport, root) => {
 
   // -- ROUTER MIDDLEWARE --
   router.use('/user',isLoggedIn)
+  router.use('/user',getUserData)
   router.use('/admin',isAdmin)
 
-  // -- AUTHENTICATION ROUTES --
+  /*-------------------------------------------------- 
+                -- AUTHENTICATION ROUTES --
+  --------------------------------------------------*/
 
   // Local User/Password Authentication Route
   router.post('/api/auth', passport.authenticate('local-login', authOptions), 
@@ -57,7 +59,7 @@ module.exports = (router, passport, root) => {
     console.log('----- END FACEBOOK TEST USER PROFILE ROUTE ------')
   })
 
-  // -- User Logout Route --
+  // -- Any User Logout Route --
   router.get('/logout', (req, res) => {
     console.log('logging out')
     req.logout()
@@ -65,20 +67,17 @@ module.exports = (router, passport, root) => {
     res.redirect('/about')
   })
 
-  // -- VOLUNTEER USER ROUTES --
+  /*-------------------------------------------------- 
+            -- VOLUNTEER USER ROUTES --
+  --------------------------------------------------*/
 
   // -- Volunteer Profile Page 
-  router.get('/user/profile', (req,res) => {
+  router.get('/user/profile', (req, res) => {
     console.log('the user: ', req.user)
+    /*    next up...
+          if res.locals.volData.err ? send error message : res.render(template with data)
+     */
     res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'))
-    // console.log('----- INSIDE USER PROFILE ROUTE ------')
-    // console.log('going to user profile...') 
-    // if (req._passport) console.log('req._passport: \n',req._passport)
-    //   else console.log('no req._passport')
-    // if (req.session) console.log('req.session.passport: ',req.session.passport || 'no session.passport')
-    //   else console.log('no session')
-    // res.sendFile(path.join(root, 'secured', 'views', 'ws-privtest.html'))
-    //console.log('----- END USER PROFILE ROUTE ------')
   })                                              
 
   // -- Volunteer opt in/out of sms texting 
@@ -87,6 +86,9 @@ module.exports = (router, passport, root) => {
     console.log('user: ', req.user)
     let userId = req.user.userId
     console.log('userId: ', userId)
+    /* Next up...
+        toggle the smsOpt based on existing user data from res.locals.volData
+    */
     //let smsOption = req.body.smsChange.optIn
     //console.log('smsOption: ', smsOption)
     VolDataDoc.findOne( { 'userId': userId }, (err, userData) => {
@@ -107,8 +109,10 @@ module.exports = (router, passport, root) => {
     })
   })
 
-  // -- ADMIN ROUTES --
-
+  /*-------------------------------------------------- 
+                  -- ADMIN ROUTES --
+  --------------------------------------------------*/
+  
   const onboardOptions = {
     successRedirect: '/admin/onboard',
     failureRedirect: '/admin/onboard',
@@ -119,7 +123,7 @@ module.exports = (router, passport, root) => {
   router.post('/admin/api/onboard', onboardUser(onboardOptions))
   
   // -- Admin Volunteer Onboarding Page --
-  router.get('/admin/onboard', (req, res, next)=>{
+  router.get('/admin/onboard', (req, res, next) => {
     console.log('going to onboard page')
     res.sendFile(path.join(root,'secured','views','onboard.html'))
   })
@@ -132,7 +136,9 @@ module.exports = (router, passport, root) => {
 
 }
 
-// -- MIDDLEWARE FUNCTIONS FOR ROUTES --
+/*-------------------------------------------------- 
+      -- MIDDLEWARE FUNCTIONS FOR ROUTES --
+--------------------------------------------------*/
 
 function isAdmin(req, res, next) {
   if (req.user) console.log('admin check: req.user = \n', req.user)
@@ -150,6 +156,7 @@ function isAdmin(req, res, next) {
 
 function isLoggedIn(req, res, next) {
   // checks if req.user exists
+  console.log('res.locals: \n', res.locals)
   if (req.isAuthenticated()) {
     console.log('auth check: user is logged in')
     return next()
@@ -157,4 +164,30 @@ function isLoggedIn(req, res, next) {
     console.log("auth check: user hasn't logged in, redirect to /about") 
     res.redirect('/about')
   }
+}
+
+function getUserData(req, res, next) {
+  // get the user data from voldata db and attach to res.locals
+  let userId = req.user.userId
+  console.log('middleware- userId: ', userId)
+  console.log('mw begin... res.locals: \n', res.locals)
+  VolDataDoc.findOne( { 'userId': userId }, (err, userData) => {
+    if (err) {
+      console.log('error finding user data.')
+      // later test if (volData.err) to see if successfully retrieved
+      res.locals.volData.err = true
+      return next()
+    } 
+    if (!userData) {
+      console.log('no user data found') 
+      res.locals.volData = null
+      return next()
+    }
+    if (userData) {
+      console.log('user data found')
+      res.locals.volData = userData
+      console.log('mw res.locals assigned... res.locals = \n', res.locals)
+      return next()
+    }
+  })  
 }
