@@ -18,7 +18,7 @@ module.exports = (wsServer) => {
       console.log(`Socket closed: ${code} for: ${reason}`)
     })
 
-    socket.send('hello from voluntext')
+    socket.send('hello from VolunText')
 
   })
 
