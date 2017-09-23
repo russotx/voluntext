@@ -6,7 +6,7 @@ const express = require('express') // request listener
 
 // --- SET UP EXPRESS APP TO HANDLE REQUESTS ---
 const app = express()
-require('./config/express-config')(app, root)
+//require('./config/express-config')(app, root)
 
 // --- CREATE AN HTTP SERVER ---
 // use the express.js app as the requestListener
@@ -16,7 +16,10 @@ module.exports = httpServer
 
 // -- CREATE WEBSOCKET SERVER --
 const wsServer = require('./wsServer')
+// -- CONFIGURE WEBSOCKET SERVER
 require('./config/websocket-config')(wsServer)
+
+require('./config/express-config')(app, root)
 
 // -- LISTEN FOR CONNECTIONS --
 httpServer.listen(process.env.PORT, (err) => {

@@ -3,12 +3,68 @@
 *       CREATE THE WEBSOCKET SERVER
 *
 */
-
+const VolDataDoc = require('./models/voldata-db')
 const WebSocket = require('ws')
 // import the session parser shared with Express app
 const sessionParser = require('./config/sessions-config')
 // import the http server
 const httpServer = require('./server')
+
+/* 
+  a simple function to validate data to send over websocket 
+  ensuring everything is sent as a string
+*/
+WebSocket.prototype.sendValidData = function(data) {
+  if (typeof data === 'function') {
+    return false
+  }
+  if (typeof data === 'string') {
+    return this.send(data)  
+  } else {
+    let dataString = JSON.stringify(data)
+    return this.send(dataString) 
+  }
+}
+
+
+/* 
+  get the data for the user from voldata db and send it as a string
+*/
+WebSocket.prototype.sendUserData = function(userId) {
+  getUserData(userId)
+    .then((data) => {
+      if (data) {
+        console.log('socket: user data found')
+        this.sendValidData(data)
+      } else {
+        console.log('socket: no user data found')
+        this.sendValidData('no data found')
+      }
+    })
+    .catch((err) => {
+      console.log('socket: error finding user data \n', err)
+      this.sendValidData(err)
+    })
+    function getUserData(userId) {
+      return new Promise((res, rej) => {
+        VolDataDoc.findOne( { 'userId': userId }, (err, userData) => {
+          if (err) {
+            console.log('error finding user data.')
+            return rej(err)
+          } 
+          if (!userData) {
+            console.log('no user data found') 
+            return res('no user data found')
+          }
+          if (userData) {
+            console.log('user data found')
+            return res(userData)
+          }
+        })  
+      })
+    }
+}
+
 
 let wsOpts = {
   /* validate incoming connections */
@@ -47,7 +103,8 @@ let wsOpts = {
       done(handshakeRes, code, httpReason)
     })
   },
-  server: httpServer 
+  server: httpServer,
+  clientTracking: true 
 }
 
 let wsServer = new WebSocket.Server(wsOpts)

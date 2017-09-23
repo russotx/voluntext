@@ -1,12 +1,11 @@
 /****  Authentication & protected routes   *****/
-
 const path = require('path')
 require('dotenv').config()
-//const UserAccount = require('../models/user-account')
 const onboardUser = require('../config/newuser-config')
 const VolDataDoc = require('../models/voldata-db')
+const wsServer = require('../wsServer')
 
-/* options for .allFailed() or .success()--req.login()*/
+/* options for .allFailed() or .success()--req.login() */
 const authOptions = {
   failureRedirect: '/login',
   failureFlash: true
@@ -20,7 +19,7 @@ const facebookOptions = {
                 -- EXPORTS --
 --------------------------------------------------*/
 module.exports = (router, passport, root) => {
-
+  
   // -- ROUTER MIDDLEWARE --
   router.use('/user',isLoggedIn)
   router.use('/user',getUserData)
@@ -72,38 +71,81 @@ module.exports = (router, passport, root) => {
   --------------------------------------------------*/
 
   // -- Volunteer Profile Page 
-  router.get('/user/profile', (req, res) => {
-    console.log('the user: ', req.user)
+  router.get('/user/profile', (req, res, next) => {
+    //console.log('the user: ', req.user)
     /*    next up...
           if res.locals.volData.err ? send error message : res.render(template with data)
      */
-    res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'))
-  })                                              
+    /*
+        The client side scripts with user-profile.html triggers a WebSocket connection
+        which then triggers sending the user's data to the user via WebSocket
+    */
+     res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'), (err) => {
+      if (err) {
+        next(err)
+      } else { 
+        console.log('file sent')
+      }
+    })
+    
+  })
+  
+  // api route for client access to user data
+  router.get('/user/api/data', (req, res) => {
+    res.json(res.locals.volData)
+  })
 
+  router.post('/user/api/hours-update', (req, res) => {
+    console.log('payload: ', req.body)
+    let hours = req.body.hours
+    let userId = req.user.userId
+    VolDataDoc.findOne( {'userId' : userId }, (err, user) => {
+      if (err) {
+        console.log('error finding user data.')
+        res.json( { saved: false, error: err } )
+      } else {
+          user.logHours(hours)
+          .then((totalHours) => {
+            if (wsServer.userSockets[userId]) {
+              wsServer.userSockets[userId].sendValidData(totalHours)
+            } else {
+              console.log('no user websocket connection')
+            }
+            res.json({ saved : true, totalHours : totalHours })
+          })
+          .catch((err) => {
+            console.log('error saving user hours: \n', err)
+            res.json({ saved : false, error: err })
+          })
+      }
+    })
+    
+  })
+  
   // -- Volunteer opt in/out of sms texting 
   router.post('/user/api/sms-opt', (req, res) => {
     console.log('payload: ', req.body)
     console.log('user: ', req.user)
+    let smsChoice = req.body.smsOpt
     let userId = req.user.userId
     console.log('userId: ', userId)
     /* Next up...
         toggle the smsOpt based on existing user data from res.locals.volData
     */
-    //let smsOption = req.body.smsChange.optIn
-    //console.log('smsOption: ', smsOption)
     VolDataDoc.findOne( { 'userId': userId }, (err, userData) => {
       if (err) {
         console.log('error finding user data.')
         res.json( { saved: false, error: err } )
       } else {
         console.log('user data found, attempting to save user data...')
-        userData.setSMSopt(true)
+        userData.setSMSopt(smsChoice)
         .then(() => { 
           console.log('saved sms option')
           res.json( { saved: true } )
         })
         .catch((err) => {
           console.log('error saving sms change: \n', err)
+          res.json( { saved: false, error: err } )
         })
       }
     })
@@ -123,7 +165,7 @@ module.exports = (router, passport, root) => {
   router.post('/admin/api/onboard', onboardUser(onboardOptions))
   
   // -- Admin Volunteer Onboarding Page --
-  router.get('/admin/onboard', (req, res, next) => {
+  router.get('/admin/onboard', (req, res) => {
     console.log('going to onboard page')
     res.sendFile(path.join(root,'secured','views','onboard.html'))
   })
