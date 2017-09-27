@@ -6,7 +6,7 @@ const VolDataDoc = require('../models/voldata-db')
 const UserAccount = require('../models/user-account')
 const wsServer = require('../wsServer')
 //const request = require('request')
-const FBloginFlow = require('../config/helpers').makeFBloginHelper
+const FB = require('../config/facebook-helper').makeFBloginHelper
 
 /* options for .allFailed() or .success()--req.login() */
 const authOptions = {
@@ -47,20 +47,6 @@ module.exports = (router, passport, root) => {
       finds user associated with fbook account                                */
   router.get('/api/auth/facebook/proceed', 
              passport.authenticate('facebook', facebookOptions))
-/*
-  router.get('/test/profile', (req,res) => {
-    console.log('----- FACEBOOK TEST: INSIDE USER PROFILE ROUTE ------')
-    console.log('going to user profile...') 
-    if (req._passport) console.log('req._passport: \n', req._passport)
-      else console.log('no req._passport')
-    if (req.session) console.log('req.session.passport: ', 
-                                  req.session.passport || 'no session.passport')
-      else console.log('no session')
-    res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'))
-    //res.sendFile(path.join(root, 'secured', 'views', 'ws-privtest.html'))
-    console.log('----- END FACEBOOK TEST USER PROFILE ROUTE ------')
-  })
-*/
   // -- Any User Logout Route --
   router.get('/logout', (req, res) => {
     console.log('logging out')
@@ -97,61 +83,26 @@ module.exports = (router, passport, root) => {
         -- user links to Facebook login api from client side          
         -- this route is hit by Facebook on redirect from login api           */
   router.get('/api/auth/facebook/onboard', (req, res) => {
-    let userId = req.user.userId
+    const userId = req.user.userId
     const appId = process.env.FACEBOOK_APP_ID
     const appSecret = process.env.FACEBOOK_APP_SECRET
     let redirectURI = ''
-    if (process.env.ENVIRONMENT === 'development') {
-      redirectURI = process.env.FACEBOOK_CALLBACK_URL_DEV_OB
-    } else {
+    process.env.ENVIRONMENT === 'development' ? 
+      redirectURI = process.env.FACEBOOK_CALLBACK_URL_DEV_OB :
       redirectURI = process.env.FACEBOOK_CALLBACK_URL_PROD_OB
-    }
     let code = req.query.code
     console.log('the FB code: \n',code)
-    FBloginFlow.getToken(appId, redirectURI, appSecret, code)
-    .then((token) => {
-      let accessToken = token
-      FBloginFlow.checkToken(accessToken, appId, appSecret)
-      .then((tokenData) => {
-        let FBuserData = {
-          id : tokenData.user_id,
-          token : accessToken
-        }
-        console.log("user's FB id: ", FBuserData.id)
-        console.log('FBuserData: \n', JSON.stringify(FBuserData))
-        if (tokenData.is_valid) {
-          // console.log('FB token is valid.')
-          // UserAccount.findOne({ 'userId' : userId }, (err, userAcct) => {
-          //   if (err) {
-          //     console.log('error finding user data: ',err)
-          //     res.redirect('/user/profile')
-          //     return false
-          //   }
-          //   userAcct.setFBdata(FBuserData)
-          //   .then((doc) => {
-          //     console.log('FB data saved: ', JSON.stringify(doc))
-          //     res.redirect('/user/profile')   
-          //   })
-          //   .catch((err) => {
-          //     console.log('error saving FB data to DB: \n', err)
-          //     res.redirect('/user/profile')
-          //   })
-          // })
-          UserAccount.setFBdata(userId, FBuserData)
-          .then((doc) => {
-            console.log('FB data saved: ', JSON.stringify(doc))
-            res.redirect('/user/profile')   
-          })
-          .catch((err) => {
-            console.log('error saving FB data to DB: \n', err)
-            res.redirect('/user/profile')
-          })
-        }
+    FB.getUserData(appId, redirectURI, appSecret, code)
+    .then((FBuserData) => {
+      UserAccount.setFBdata(userId, FBuserData)
+      .then((doc) => {
+        console.log('FB data saved: ', JSON.stringify(doc))
+        res.redirect('/user/profile')   
       })
     })
     .catch((err) => {
-      console.log('error during Facebook login dialog: \n', err)
-      res.json( { 'success' : false } )
+      console.log('error retreiving fb data: \n', err)
+      res.redirect('/user/profile')
     })
   })
   
