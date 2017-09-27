@@ -3,8 +3,10 @@ const path = require('path')
 require('dotenv').config()
 const onboardUser = require('../config/newuser-config')
 const VolDataDoc = require('../models/voldata-db')
+const UserAccount = require('../models/user-account')
 const wsServer = require('../wsServer')
-const request = require('request')
+//const request = require('request')
+const FBloginFlow = require('../config/helpers').makeFBloginHelper
 
 /* options for .allFailed() or .success()--req.login() */
 const authOptions = {
@@ -91,24 +93,13 @@ module.exports = (router, passport, root) => {
       })
   })
   
-  /* 
-      User Allow Access to their Facebook info & store in DB 
-  */
-  router.get('/user/api/add-fb', (req, res) => {
-    let appId = process.env.FACEBOOK_APP_ID
-    let redUri = process.env.FACEBOOK_CALLBACK_URL_DEV_OB
-    let uri = `https://www.facebook.com/v2.10/dialog/oauth?`+
-               `client_id=${appId}`+
-               `&redirect_uri=${redUri}`        
-    console.log('the facebook api url: \n', uri)
-    // this redirect will get blocked due to CORS.
-    res.redirect(uri)
-  })
-  
+/*   User Allow Access to their Facebook info & store in DB         
+        -- user links to Facebook login api from client side          
+        -- this route is hit by Facebook on redirect from login api           */
   router.get('/api/auth/facebook/onboard', (req, res) => {
+    let userId = req.user.userId
     const appId = process.env.FACEBOOK_APP_ID
     const appSecret = process.env.FACEBOOK_APP_SECRET
-    let FBuserId = ''
     let redirectURI = ''
     if (process.env.ENVIRONMENT === 'development') {
       redirectURI = process.env.FACEBOOK_CALLBACK_URL_DEV_OB
@@ -117,36 +108,54 @@ module.exports = (router, passport, root) => {
     }
     let code = req.query.code
     console.log('the FB code: \n',code)
-    let FBcodeExchangeUri = `https://graph.facebook.com/v2.10/oauth/access_token?`+
-                `client_id=${appId}`+
-                `&redirect_uri=${redirectURI}`+
-                `&client_secret=${appSecret}`+
-                `&code=${code}`
-    // exchange the code for an access token      
-    request(FBcodeExchangeUri, {json : true}, (err, res, body) => {
-      if (err) {
-        console.log('error with code exchange: \n', err)
-        res.redirect('/user/profile')
-      } else if (body.err) {
-          console.log('FB code exchange error: \n', body.err)
-      } else {
-        console.log('code echange body: \n', body)
-        if (body.access_token) {
-          let accessToken = body.access_token
-          let FBtokenCheckUri = `https://graph.facebook.com/debug_token?`+
-                                `input_token=${accessToken}`+
-                                `&access_token=${appId}|${appSecret}`
-          // ensure the token is legit and get the user's FB userId
-          request(FBtokenCheckUri, {json: true}, (err, res, body) => {
-            console.log(body)
-            console.log('Facebook user Id: ', body.data.user_id)
-            FBuserId = body.data.user_id
+    FBloginFlow.getToken(appId, redirectURI, appSecret, code)
+    .then((token) => {
+      let accessToken = token
+      FBloginFlow.checkToken(accessToken, appId, appSecret)
+      .then((tokenData) => {
+        let FBuserData = {
+          id : tokenData.user_id,
+          token : accessToken
+        }
+        console.log("user's FB id: ", FBuserData.id)
+        console.log('FBuserData: \n', JSON.stringify(FBuserData))
+        if (tokenData.is_valid) {
+          // console.log('FB token is valid.')
+          // UserAccount.findOne({ 'userId' : userId }, (err, userAcct) => {
+          //   if (err) {
+          //     console.log('error finding user data: ',err)
+          //     res.redirect('/user/profile')
+          //     return false
+          //   }
+          //   userAcct.setFBdata(FBuserData)
+          //   .then((doc) => {
+          //     console.log('FB data saved: ', JSON.stringify(doc))
+          //     res.redirect('/user/profile')   
+          //   })
+          //   .catch((err) => {
+          //     console.log('error saving FB data to DB: \n', err)
+          //     res.redirect('/user/profile')
+          //   })
+          // })
+          UserAccount.setFBdata(userId, FBuserData)
+          .then((doc) => {
+            console.log('FB data saved: ', JSON.stringify(doc))
+            res.redirect('/user/profile')   
+          })
+          .catch((err) => {
+            console.log('error saving FB data to DB: \n', err)
+            res.redirect('/user/profile')
           })
         }
-      }
+      })
+    })
+    .catch((err) => {
+      console.log('error during Facebook login dialog: \n', err)
+      res.json( { 'success' : false } )
     })
   })
   
+    
   // api route for client access to user data
   router.get('/user/api/data', (req, res) => {
     res.json(res.locals.volData)

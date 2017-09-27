@@ -1,9 +1,9 @@
-/* ---------------------------------------------------------------- 
+/************************************************************************* 
 *
 *       Mongoose Schema & related methods for user accounts
 *       used in authentication & session management
 *
-----------------------------------------------------------------*/
+************************************************************************ */
 
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
@@ -14,7 +14,9 @@ mongoose.Promise = global.Promise
 const authDBconnection = require('../config/mongoose-config').authDBconn
 const Schema = mongoose.Schema
 
-
+/************************************************************************* 
+                  -- the schema --
+*************************************************************************/
 let userAccountSchema = new Schema({
   userId: String,
   local: {  
@@ -34,10 +36,11 @@ let userAccountSchema = new Schema({
   }
 })
 
-/*   
-    -- Password hashing and checking --
-    
-*/
+let userAccountModel = authDBconnection.model('UserAccount', userAccountSchema)
+
+/*************************************************************************    
+          -- Password hashing and checking --
+*************************************************************************/
 
 userAccountSchema.methods.generateHash = function(password) {
   console.log('creating password hash')
@@ -49,14 +52,11 @@ userAccountSchema.methods.validPassword = function(password) {
   return bcrypt.compareSync(password, this.local.password)
 }
 
-/* 
-      -- Setters and Initializers -- 
-      
-*/
+/************************************************************************* 
+                   -- Setters and Initializers -- 
+*************************************************************************/
 
-/* 
-    Automated initialization of a new user account for onboarding new volunteers
-*/
+/* Automated initialization of a new user account for onboarding volunteers */
 userAccountSchema.methods.initUserAcct = function(email, password, callback) {
   return new Promise((res,rej) => {
     this.set({
@@ -85,6 +85,62 @@ userAccountSchema.methods.initUserAcct = function(email, password, callback) {
   })
 }
 
+/* save the user's Facebook data after they access the login dialog */
+userAccountModel.setFBdata = function(uid, data) {
+  return new Promise((res, rej) => {
+    userAccountModel.findOne({ 'userId' : uid  }, (err, userAcct) => {
+      if (err) {
+        console.log('error finding user data: ',err)
+        rej(err)
+      }
+      if ('object' === typeof data) {
+        if (data.id)
+          userAcct.set( { 'facebook' : { 'id' : data.id } } )
+        if (data.email)
+          userAcct.set( { 'facebook' : { 'email' : data.email } } )
+        if (data.name)
+          userAcct.set( { 'facebook' : { 'name' : data.name } } )
+        if (data.token)
+          userAcct.set( { 'facebook' : { 'token' : data.token } } )
+        userAcct.save(function(err, doc){
+          if (err) {
+            console.log('error saving FB data: \n', err)
+            return rej(err)
+          }
+          return res(doc)
+        })
+      } else {
+        rej('FB data must be an object')
+      } 
+    })
+  })
+}
+
+// userAccountSchema.methods.setFBdata = function(uid, data) {
+//   return new Promise((res, rej) => {
+//     if ('object' === typeof data) {
+//       if (data.id)
+//         this.set( { 'facebook' : { 'id' : data.id } } )
+//       if (data.email)
+//         this.set( { 'facebook' : { 'email' : data.email } } )
+//       if (data.name)
+//         this.set( { 'facebook' : { 'name' : data.name } } )
+//       if (data.token)
+//         this.set( { 'facebook' : { 'token' : data.token } } )
+//       this.save(function(err, doc){
+//         if (err) {
+//           console.log('error saving FB data: \n', err)
+//           return rej(err)
+//         }
+//         return res(doc)
+//       })
+//     } else {
+//       rej('FB data must be an object')
+//     }
+//   })
+// }
+
+
 /* 
   Give the user's unique ID created by the Voldata schema when 
   initializing the user's entry in the volunteer data DB
@@ -105,9 +161,8 @@ userAccountSchema.methods.setUserId = function(userId, callback){
       return Promise.resolve( doc )
     }
   })
-
 } 
 
 
 // export the model for the user account for authentication purposes
-module.exports = authDBconnection.model('UserAccount', userAccountSchema)
+module.exports = userAccountModel /* authDBconnection.model('UserAccount', userAccountSchema) */
