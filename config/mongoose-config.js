@@ -1,3 +1,10 @@
+/*--------------------------------------------------
+*
+*     Create MongoDB connections that can be used 
+*     by the rest of the app
+*
+--------------------------------------------------*/
+
 const mongoose = require('mongoose')
 require('dotenv').config()
 // if environment is dev use dev urls, otherwise use production urls

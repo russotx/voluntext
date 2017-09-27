@@ -4,14 +4,19 @@ const userPageLogic = {
   userData : {},
   ws : null,
   smsProcessing : false,
-  
+  fbLoginUrl : 'https://www.facebook.com/v2.10/dialog/oauth',
+  fbAppId : '2360172457541198',
+  fbRedirect : 'http://localhost:3000/api/auth/facebook/onboard',
   page : {
     smsRadio : document.getElementById('sms-radio'),
     smsSlider : document.getElementById('sms-slider'),
     smsYes : document.getElementById('sms-yes'),
     smsNo : document.getElementById('sms-no'),
     totalHours : document.getElementById('total-hours'),
-    wsMessages : document.getElementById('ws-messages')
+    wsMessages : document.getElementById('ws-messages'),
+    latestHrs : document.getElementById('latest-hrs'),
+    username : document.getElementById('username'),
+    connFbBtn : document.getElementById('conn-fb-btn') 
   },
   
   startWSConnection : function() {
@@ -62,13 +67,31 @@ const userPageLogic = {
       this.page.smsRadio.checked = elements.smsOpt;
       this.page.smsNo.classList.toggle('hide');
       this.page.smsYes.classList.toggle('hide');
+      this.page.smsRadio.disabled = false;
     }
     if (elements.totalHours !== null){
       this.page.totalHours.textContent = elements.totalHours;
     }
-    this.page.smsRadio.disabled = false;
+    if (elements.hoursLog[0].hours !== null) {
+      this.page.latestHrs.textContent = elements.hoursLog[0].hours;
+    }
+    if (elements.email !== null) {
+      this.page.username.textContent = elements.email;
+    }
   }, // -- end updateDOM
-  
+  connectFacebook : function() {
+    // axios.get('/user/api/add-fb')
+    // .then(() => {
+    //   return true;
+    // })
+    // .catch((err) => {
+    //   console.log('error trying to connect FB: ', err);
+    // })
+    let fbLogin = userPageLogic.fbLoginUrl;
+    let appId = userPageLogic.fbAppId;
+    let redirect = userPageLogic.fbRedirect;
+    location.href=`${fbLogin}?client_id=${appId}&redirect_uri=${redirect}`
+  },
   getUserData : function() {
     let _this = this;
     axios.get('/user/api/data')
@@ -84,6 +107,7 @@ const userPageLogic = {
   initUserLogic : function() { 
     let _this = this;
     this.page.smsRadio.addEventListener('click', _this.setSMSOpt);
+    this.page.connFbBtn.addEventListener('click', _this.connectFacebook);
     this.startWSConnection();
   }, // -- end initUserLogic()
   
@@ -130,49 +154,3 @@ const userPageLogic = {
 }
 
 userPageLogic.initUserLogic();
-
-
-
-
-
-/*
-smsSlider.addEventListener('click', (event) => {
-    event.preventDefault();
-    if(!smsProcessing) {
-      smsProcessing = true;
-      smsRadio.checked ? smsRadio.checked = false : smsRadio.checked = true;
-      smsNo.classList.toggle('hide');
-      smsYes.classList.toggle('hide');
-      //smsRadio.disabled = true;
-      toggleSMSopt()
-      .then(() => {
-        smsProcessing = false;
-        console.log('smsOpt success');
-        //smsRadio.disabled = false;
-      }) 
-      .catch((err) => {
-        console.log('smsOpt error: ',err);
-      })
-    } 
-    return true;
-    function toggleSMSopt() {
-      let smsChange = {
-        optIn : smsRadio.checked
-      }
-      return new Promise((res, rej) => {
-        axios.post('/user/api/sms-opt', smsChange )
-        .then(() => {
-          console.log('sent post req');
-          res();
-        })
-        .catch((err) => {
-          console.log('post req error');
-          rej(err);
-        });
-        // setTimeout(() => {
-        //   res();
-        // }, 8000);
-      });
-    }
-  });
-*/

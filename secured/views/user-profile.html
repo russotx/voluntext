@@ -5,55 +5,103 @@
   <title>VolunText User Profile</title>
   <!-- reset browser defaults -->
   <link rel="stylesheet" type="text/css" href="/reset.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
   <!-- custom stylesheet -->
   <link rel="stylesheet" type="text/css" href="/user-page.css">
   <meta property="fb:app_id" content="2360172457541198">
   <meta property="og:type" content="article">
 </head>
+
 <body class="container-fluid">
-  <header class="row">
-    <h1>"Welcome to the User Profile Page"</h1>
-    <nav class="col-md-12">
-
-    </nav>
-    <h3>Total Hours Volunteered: <span id='total-hours'></span></h3>
-
+  
+  <header id="page-header" class="row">
+    <div class="col-md-4 offset-md-4">
+      <h4 id="vtext-logo-txt" class="text-center">VolunText</h4>
+    </div>
+    <div class="d-flex col-md-4 username">
+      <p>user: <span id="username"></span></p>
+    </div>
   </header>
+  <summary class="row">
+    <div class="col-md-12">
+      <h5>Total Hours Volunteered: <span id='total-hours'></span></h5>
+    </div>
+  </summary>
 
   <!-- the main body: begin content -->
-  <main class="row">
+  <main class="container-fluid">
 
     <!-- Primary content -->
-    <section class="col-md-12">
-
-      <p id="new-vol-hours" class="fb-quotable">Hey I volunteered X hours!</p>
-      <div id="fb-quote" class="fb-quote" data-layout="quote"></div>
-      <button id="fb-pub-btn" type="button">Post Hours To Facebook!</button>
-      <div id="fb-res-msg"></div>
-    
+    <section id="user-actions" class="d-flex row">
+      <div class="col-md-4">
+        <h5>Share your accomplishment on Facebook</h5>
+        <p class="instruct">*requires connection with your Facebook account</p>
+        <figure class="card">
+          <div class="card-block">
+            <p id="new-vol-hours" class="fb-quotable ">This week I volunteered <span id='latest-hrs'></span> hours!</p>
+          </div>
+        </figure>
+        <div id="fb-quote" class="fb-quote" data-layout="quote"></div>
+        <p class="instruct">Just highlight the text in the box and click the flag!</p>
+        <button id="fb-pub-btn" type="button">Post Hours To Facebook!</button>
+        <div id="fb-res-msg"></div>
+      </div>
+      <div class="col-md-4">
+        <h5>Report volunteer hours:</h5>
+        <input type="number">
+        <input type="submit">
+      </div>
     </section>
 
-    <section class="preferences col-md-12">
-
-      <h4>Receive text message reminders to report hours?</h4>
-      <label class="switch">
-        <input type="checkbox" id="sms-radio">
-        <span class="slider round" id="sms-slider"></span>
-      </label>
-      
-      <span id="sms-opt-msg">
-        <p id="sms-yes" class="slider-msg hide">Yes</p>
-        <p id="sms-no" class="slider-msg">No</p>
-      </span>
-
-    </section>
+    <aside id="preferences" class="row">
+      <hgroup class="col-md-12">
+        <h5>Preferences</h5>
+      </hgroup>
+      <section id="sms-opt" class="col-lg-4">
+        <header><p>Receive reminders via text message?</p></header>
+        <label class="switch">
+          <input type="checkbox" id="sms-radio">
+          <span class="slider round" id="sms-slider"></span>
+        </label>
+        <span id="sms-opt-msg">
+          <p id="sms-yes" class="slider-msg hide">Yes</p>
+          <p id="sms-no" class="slider-msg">No</p>
+        </span>
+      </section>
+      <section id="change-email" class="col-lg-4">
+        <header><p>Change Email:</p></header>
+        <p class="instruct">*You will be sent a confirmation email</p>
+        <div class="label-input">
+          <label>new email</label>
+          <input id="new-email" type="email"><br>
+        </div>
+        <input id="new-email-btn" type="submit">
+      </section>
+      <section id="change-pwd" class="col-lg-4">
+        <header><p>Change Password:</p></header>
+        <div class="label-input">
+          <label>new password</label>
+          <input id="pwd1" type="password">
+        </div>
+        <div class="label-input">
+          <label>confirm password</label>
+          <input id="pwd2" type="password">
+        </div>
+        <input id="new-pwd-btn" type="submit">
+      </section>
+      <section id="conn-fb" class="col-lg-4">
+        <header><p>Connect Your Facebook Account:</p></header>
+          <button id="conn-fb-btn">Facebook</button>
+        </div>
+      </section>
+    </aside>
     
-      <section class="col-md-12">
-      
-      <h4>System Messages</h4>
-      <pre id="ws-messages"style="overflow: scroll; height: 100px; width: 75%;"></pre>
-    
+    <section class="row">
+      <div class="col-md-12">
+        <h5>System Messages</h5>
+        <pre id="ws-messages"style="overflow: scroll; height: 100px; width: 75%;"></pre>
+      </div>
     </section>
 
       <!-- no more content past this piont -->

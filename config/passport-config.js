@@ -82,15 +82,26 @@ const localStrategy = require('passport-local').Strategy
 const facebookStrategy = require('passport-facebook').Strategy
 // DB with user accounts for authentication
 const UserAccount = require('../models/user-account')
-// DB with volunteer data corresponding to users
-//const VolDataDoc = require('../models/voldata-db')
-
 require('dotenv').config()
+
+/* 
+  Set the Facebook API redirect uri depending on environment
+  URI must be saved as valid uri for the app at developers.facebook.com 
+*/
+let FBCBURL = ''
+if (process.env.ENVIRONMENT === 'development') {
+  FBCBURL = process.env.FACEBOOK_CALLBACK_URL_DEV  
+} else {
+  FBCBURL = process.env.FACEBOOK_CALLBACK_URL_PROD
+}
 
 // configure passport 
 module.exports = (passport) => {
 
-  // ---- SESSION MANAGEMENT ----
+  /**  
+      ---- SESSION MANAGEMENT ----
+      
+  */
 
   // @params: fn | req | done
   // pushes fn onto passport.serializers stack
@@ -118,10 +129,16 @@ module.exports = (passport) => {
       })
   })
 
-  // ---- AUTHENTICATION STRATEGIES ----
-  // `new strategy` overrides the passport.Strategy.authenticate method  
+  /**
+        ---- AUTHENTICATION STRATEGIES ----
+        
+        `new strategy` overrides the passport.Strategy.authenticate method      
+  */
 
-  // -- Local Strategy --
+  /**
+      -- Local Strategy for username/password authentication --
+      
+  */
   passport.use('local-login', new localStrategy(
     /* strategy options parameter */
     {
@@ -172,25 +189,45 @@ module.exports = (passport) => {
     }) // -- end 'passport-local' constructor
   )// -- end middleware
 
-  // -- Facebook Strategy --
+  /** 
+        -- Facebook Strategy for authentication --
+        
+      Uses OAuth 2.0 as of 9/26/17
+      uses passport-facebook module
+      facebook has OAuth and profile urls which take parameters, return json,
+      and use browser redirects.
+      If parameters are invalid or missing then facebook returns an error json
+      with message, type, code, and trace id.
+      https://developers.facebook.com/docs/facebook-login/web
+      https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow
+      
+      login dialog endpoint https://www.facebook.com/v2.10/dialog/oauth
+        - several options for returned data in the form of URL params or frags
+      access token endpoint https://graph.facebook.com/v2.10/oauth/access_token
+        - returns JSON
+      passport-facebook implements all of OAuth2.0 flow with Facebook
+      
+  */
   
   passport.use('facebook', new facebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    /* url for facebook to send client after authentication on FB's end */
-    callbackURL: 'http://localhost:3000/api/auth/facebook/proceed',
+    /* url for facebook to send client after FB authenticate's the user */
+    callbackURL: FBCBURL,
     enableProof: true
   },
-  /* Facebook returns some of the user's profile information
+  /* -- the Verify Callback Function --
+     Facebook returns some of the user's profile information
      Passport handles token verification and normalizes user profile into
      easily parsed object     */
   (accessToken, refreshToken, profile, done) => {
-    console.log('fb profile: \n',profile || 'no profile')
-    console.log('fb id: ',profile.id)
+    console.log('fb profile: \n', profile || 'no profile')
+    console.log('fb id: ', profile.id)
     let fbId = profile.id
     /* Check user account DB for the user's facebook ID, if match
       is found the user can proceed as authenticated, otherwise the user is
       redirected to the failure option set at the route */
+    
     UserAccount.findOne( { 'facebook.id': fbId }, (err, user) => {
       if (err) { 
         console.log('facebook: error with user account DB')  
@@ -198,12 +235,14 @@ module.exports = (passport) => {
       } 
       if (!user) {
         console.log('facebook: user invalid')
-        return done(null,false)
+        // first param is for an error, 2nd param says not authenticated
+        return done(null, false)
       } 
       console.log('facebook: user logged in')
       /* TODO: save access token in the database
 
       */
+      // first param is for an error, 2nd param says who was authenticated
       return done(null, user)
     })
   }
