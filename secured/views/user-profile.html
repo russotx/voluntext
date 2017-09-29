@@ -32,19 +32,23 @@
   <!-- the main body: begin content -->
   <main class="container-fluid">
 
-    <!-- Primary content -->
+    <!-- Share content to Facebook -->
     <section id="user-actions" class="d-flex row">
       <div class="col-md-4">
         <h5>Share your accomplishment on Facebook</h5>
         <p class="instruct">*requires connection with your Facebook account</p>
         <figure class="card">
           <div class="card-block">
+            <!-- quote dialog api -->
             <p id="new-vol-hours" class="fb-quotable ">This week I volunteered <span id='latest-hrs'></span> hours!</p>
           </div>
         </figure>
+        <!-- quote dialog api code will be inserted here -->
         <div id="fb-quote" class="fb-quote" data-layout="quote"></div>
-        <p class="instruct">Just highlight the text in the box and click the flag!</p>
+        <p class="instruct">Just highlight the text in the box and click the pop-up flag!</p>
+        <!-- share dialog api -->
         <button id="fb-pub-btn" type="button">Post Hours To Facebook!</button>
+        <!-- share dialog api code will be inserted here -->
         <div id="fb-res-msg"></div>
       </div>
       <div class="col-md-4">
@@ -54,6 +58,7 @@
       </div>
     </section>
 
+    <!-- User preferences cards -->
     <aside id="preferences" class="row">
       <hgroup class="col-md-12">
         <h5>Preferences</h5>
@@ -113,9 +118,8 @@
     <p>&copy;Copyright 2017 Daniel Russo</p>
   </div>
 </footer>
-<script src='/facebook-sdk.js'></script>
-<!-- <script src="/ws-apptest.js"></script> -->
-<script src="/facebook-actions.js"></script>
+<!-- <script src='/facebook-sdk.js'></script>
+<script src="/facebook-actions.js"></script> -->
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src='/user-profile.js'></script>
 </body>

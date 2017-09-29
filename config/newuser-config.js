@@ -76,8 +76,6 @@ function validateOnboard(props) {
   })  
 }
 
-
-
 // export function that takes options for how to handle success/failure
 module.exports = (options) => {
   // return a function that takes req, res, next from Express app
@@ -91,43 +89,38 @@ module.exports = (options) => {
       'password1': req.body.password1,
       'password2': req.body.password2
     }
-    console.log('new user:: email: ',userProps.email,' password: ',userProps.password1)
+    console.log('new user:: email: ', userProps.email, ' password: ', 
+                userProps.password1)
     // look to see if email already exists in the DB
-    //return new Promise((res,rej) => {
     UserAccount.findOne({ 'local.email' : userProps.email }, (err, user) => {
       console.log('begin save new user')
       if (err) {
         console.log('error with DB trying to check dupe email on signup: ', err)
         err.stepMessage = 'error with DB trying to check dupe email on signup'
-        //handler(err)
-        //rej(err)
         if (failureFlash) req.flash('onboardMessage',err.stepMessage)
         res.redirect(failureRedirect)
         next()
       }
       if (user) {
         console.log('email already exists')
-        /*handler(null, user, req.flash('signupMessage', 
-          'A user has already been created with that email.'))*/
         if (failureFlash) req.flash('onboardMessage','user already exists with this email: '+userProps.email)
         res.redirect(failureRedirect)
         next()
       } 
-      // user doesn't exist yet, proceeding to create new user
+      // the user doesn't exist yet, proceeding to create new user
       console.log('attempting to create and save new user') 
       // re-validate the user data as added precaution
       validateOnboard(userProps)
       .then((validProps) => {
         // new user properties | sms opt-in
-        createNewUser(validProps,false)
+        createNewUser(validProps, false)
         .then((doc) => {
-          console.log('successfully created new user')
-          //res.json(validProps)
+          console.log('successfully created new user: \n', doc)
           res.redirect(successRedirect)
           next()
         })
         .catch((err) => {
-          console.log('error creating new user: ', err.stepMessage,'\n',err)
+          console.log('error creating new user: ', err.stepMessage, '\n', err)
           /* handleNewUserErrors().then().catch() */
           if (failureFlash) req.flash('onboardMessage',err.stepMessage)
           res.redirect(failureRedirect)
@@ -135,9 +128,10 @@ module.exports = (options) => {
         }) // -- end createNewUser .catch
       }) // -- end validateOnboard .then
       .catch((err) => {
-        console.log('error with user data \n',err)
-        if(failureFlash) req.flash('onboardMessage', 'error with user data')
+        console.log('error with user data \n', err)
+        if (failureFlash) req.flash('onboardMessage', 'error with user data')
         res.redirect(failureRedirect)
+        next()
       })
     }) // -- end .findOne() looking for dupe acct 
   } // end returned middleware function

@@ -7,6 +7,8 @@ const userPageLogic = {
   fbLoginUrl : 'https://www.facebook.com/v2.10/dialog/oauth',
   fbAppId : '2360172457541198',
   fbRedirect : 'http://localhost:3000/api/auth/facebook/onboard',
+  orgURL : 'http://www.casatravis.org',
+  orgHashtag : '#casatravis',
   page : {
     smsRadio : document.getElementById('sms-radio'),
     smsSlider : document.getElementById('sms-slider'),
@@ -15,8 +17,12 @@ const userPageLogic = {
     totalHours : document.getElementById('total-hours'),
     wsMessages : document.getElementById('ws-messages'),
     latestHrs : document.getElementById('latest-hrs'),
+    newVolHrs : document.getElementById('new-vol-hours'),
     username : document.getElementById('username'),
-    connFbBtn : document.getElementById('conn-fb-btn') 
+    connFbBtn : document.getElementById('conn-fb-btn'),
+    fbQuote : document.getElementById('fb-quote'),
+    fbPubBtn : document.getElementById('fb-pub-btn'),
+     
   },
   
   startWSConnection : function() {
@@ -79,6 +85,7 @@ const userPageLogic = {
       this.page.username.textContent = elements.email;
     }
   }, // -- end updateDOM
+  
   connectFacebook : function() {
     // axios.get('/user/api/add-fb')
     // .then(() => {
@@ -92,6 +99,7 @@ const userPageLogic = {
     let redirect = userPageLogic.fbRedirect;
     location.href=`${fbLogin}?client_id=${appId}&redirect_uri=${redirect}`
   },
+  
   getUserData : function() {
     let _this = this;
     axios.get('/user/api/data')
@@ -106,9 +114,26 @@ const userPageLogic = {
   
   initUserLogic : function() { 
     let _this = this;
-    this.page.smsRadio.addEventListener('click', _this.setSMSOpt);
-    this.page.connFbBtn.addEventListener('click', _this.connectFacebook);
     this.startWSConnection();
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId            : '2360172457541198',
+        autoLogAppEvents : true,
+        xfbml            : true,
+        version          : 'v2.10'
+      });
+      FB.AppEvents.logPageView();
+      _this.page.smsRadio.addEventListener('click', _this.setSMSOpt);
+      _this.page.connFbBtn.addEventListener('click', _this.connectFacebook);
+      _this.page.fbPubBtn.addEventListener('click', _this.shareDialog)
+    };
+    (function(d, s, id){
+      let js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) {return;}
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
   }, // -- end initUserLogic()
   
   setSMSOpt : function(event) {
@@ -149,7 +174,18 @@ const userPageLogic = {
       });
     } 
     return true;    
-  } // -- end setSMSOpt()
+  }, // -- end setSMSOpt()
+  
+  shareDialog : function() {
+    let _this = userPageLogic;
+    FB.ui({
+      method: 'share',
+      display: 'popup',
+      href: _this.orgURL,
+      quote: _this.page.newVolHrs.textContent,
+      hashtag: _this.orgHashtag
+    }, function(response){});
+  }
   
 }
 

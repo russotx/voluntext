@@ -26,6 +26,8 @@ function newTimeStamp(){
   return now.format('MM,D,YYYY|HH|mm|ss')
 }
 
+const volDataModel = dataDBconnection.model('VolDataDoc', volDataSchema)
+
 volDataSchema.methods.initDoc = function(email, phone, smsOpt=false){
     let timeStamp = newTimeStamp()
     return new Promise((res,rej) => {
@@ -54,41 +56,53 @@ volDataSchema.methods.initDoc = function(email, phone, smsOpt=false){
     })
 }
 
-volDataSchema.methods.logHours = function(hours) {
-  // TODO: need to return a promise from this method
+volDataModel.logHours = function(userId, hours) {
   return new Promise((res, rej) => {
-    let timeStamp = newTimeStamp()
-    this.hoursLog.push({
-      'entryId': this.email + ':' + timeStamp,
-      'hours': hours,
-      'timeStamp': timeStamp
-    })
-    this.totalHours = this.totalHours + hours
-    let totalHours = this.totalHours
-    this.save(function(err){
+    volDataModel.findOne( {'userId' : userId }, (err, user) => {
       if (err) {
-        console.log('error saving hours')
+        console.log('error finding user data.')
         rej(err)
-      } else {
-        res(totalHours)
       }
-    })  
+      let timeStamp = newTimeStamp()
+      user.hoursLog.push({
+        'entryId': this.email + ':' + timeStamp,
+        'hours': hours,
+        'timeStamp': timeStamp
+      })
+      user.totalHours = user.totalHours + hours
+      let totalHours = user.totalHours
+      user.save(function(err){
+        if (err) {
+          console.log('error saving hours')
+          rej(err)
+        } else {
+          res(totalHours)
+        }
+      })  
+    })
   })
 }
 
-volDataSchema.methods.setSMSopt = function(option) {
+volDataModel.setSMSopt = function(userId, option) {
   return new Promise((res,rej) => {
-    this.set({ 'smsOpt': option })
-    this.save(function(err, doc){
-      if (err){
-        console.log('sms opt in error: ',err)
+    volDataModel.findOne( { 'userId': userId }, (err, userData) => {
+      if (err) {
+        console.log('error finding user data.')
         rej(err)
-      } else {
-        res(doc)
       }
+      console.log('user data found, attempting to save user data...')
+      userData.set({ 'smsOpt': option })
+      userData.save(function(err, doc){
+        if (err){
+          console.log('sms opt in error: ',err)
+          rej(err)
+        } else {
+          res(doc)
+        }
+      })
     })
   })
 }
 
 // export the model for storing volunteer related data
-module.exports = dataDBconnection.model('VolDataDoc', volDataSchema)
+module.exports = volDataModel

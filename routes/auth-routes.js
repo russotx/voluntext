@@ -5,7 +5,6 @@ const onboardUser = require('../config/newuser-config')
 const VolDataDoc = require('../models/voldata-db')
 const UserAccount = require('../models/user-account')
 const wsServer = require('../wsServer')
-//const request = require('request')
 const FB = require('../config/facebook-helper').makeFBloginHelper
 
 /* options for .allFailed() or .success()--req.login() */
@@ -40,14 +39,15 @@ module.exports = (router, passport, root) => {
       }
     })
 
-  // Facebook Authentication Route
+  // Facebook Authentication Routes
   router.get('/api/auth/facebook', passport.authenticate('facebook'))
   /* Facebook Authentication Redirect Route
-      callback for facebook strategy is called here- 
-      finds user associated with fbook account                                */
+      - callback for facebook strategy is called & 
+        finds user associated with fbook account                              */
   router.get('/api/auth/facebook/proceed', 
              passport.authenticate('facebook', facebookOptions))
-  // -- Any User Logout Route --
+             
+/*    -- Any User Logout Route --                                             */
   router.get('/logout', (req, res) => {
     console.log('logging out')
     req.logout()
@@ -61,15 +61,9 @@ module.exports = (router, passport, root) => {
 
   // -- Volunteer Profile Page 
   router.get('/user/profile', (req, res, next) => {
-    /*    next up...
-          if res.locals.volData.err ? send error message : res.render(template with data)
-     */
-/*
-        The client side scripts with user-profile.html triggers 
-        WebSocket connection which then triggers sending the user's data 
-        to the user via WebSocket
-*/
-     res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'), 
+/*      The client triggers a WebSocket connection which then triggers 
+        sending the user's data to the user via WebSocket                     */
+    res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'), 
       (err) => {
         if (err) {
           next(err)
@@ -91,7 +85,6 @@ module.exports = (router, passport, root) => {
       redirectURI = process.env.FACEBOOK_CALLBACK_URL_DEV_OB :
       redirectURI = process.env.FACEBOOK_CALLBACK_URL_PROD_OB
     let code = req.query.code
-    console.log('the FB code: \n',code)
     FB.getUserData(appId, redirectURI, appSecret, code)
     .then((FBuserData) => {
       UserAccount.setFBdata(userId, FBuserData)
@@ -113,58 +106,35 @@ module.exports = (router, passport, root) => {
   })
 
   router.post('/user/api/hours-update', (req, res) => {
-    console.log('payload: ', req.body)
     let hours = req.body.hours
     let userId = req.user.userId
-    VolDataDoc.findOne( {'userId' : userId }, (err, user) => {
-      if (err) {
-        console.log('error finding user data.')
-        res.json( { saved: false, error: err } )
+    VolDataDoc.logHours(userId, hours)
+    .then((totalHours) => {
+      if (wsServer.userSockets[userId]) {
+        wsServer.userSockets[userId].sendValidData(totalHours)
       } else {
-          user.logHours(hours)
-          .then((totalHours) => {
-            if (wsServer.userSockets[userId]) {
-              wsServer.userSockets[userId].sendValidData(totalHours)
-            } else {
-              console.log('no user websocket connection')
-            }
-            res.json({ saved : true, totalHours : totalHours })
-          })
-          .catch((err) => {
-            console.log('error saving user hours: \n', err)
-            res.json({ saved : false, error: err })
-          })
+        console.log('no user websocket connection')
       }
+      res.json({ saved : true, totalHours : totalHours })
     })
-    
+    .catch((err) => {
+      console.log('error saving user hours: \n', err)
+      res.json({ saved : false, error: err })
+    })
   })
   
   // -- Volunteer opt in/out of sms texting 
   router.post('/user/api/sms-opt', (req, res) => {
-    console.log('payload: ', req.body)
-    console.log('user: ', req.user)
     let smsChoice = req.body.smsOpt
     let userId = req.user.userId
-    console.log('userId: ', userId)
-    /* Next up...
-        toggle the smsOpt based on existing user data from res.locals.volData
-    */
-    VolDataDoc.findOne( { 'userId': userId }, (err, userData) => {
-      if (err) {
-        console.log('error finding user data.')
-        res.json( { saved: false, error: err } )
-      } else {
-        console.log('user data found, attempting to save user data...')
-        userData.setSMSopt(smsChoice)
-        .then(() => { 
-          console.log('saved sms option')
-          res.json( { saved: true } )
-        })
-        .catch((err) => {
-          console.log('error saving sms change: \n', err)
-          res.json( { saved: false, error: err } )
-        })
-      }
+    VolDataDoc.setSMSopt(userId, smsChoice)
+    .then(() => { 
+      console.log('saved sms option')
+      res.json( { saved: true } )
+    })
+    .catch((err) => {
+      console.log('error saving sms change: \n', err)
+      res.json( { saved: false, error: err } )
     })
   })
 

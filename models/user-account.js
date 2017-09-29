@@ -36,7 +36,7 @@ let userAccountSchema = new Schema({
   }
 })
 
-let userAccountModel = authDBconnection.model('UserAccount', userAccountSchema)
+const userAccountModel = authDBconnection.model('UserAccount', userAccountSchema)
 
 /*************************************************************************    
           -- Password hashing and checking --
@@ -115,31 +115,6 @@ userAccountModel.setFBdata = function(uid, data) {
     })
   })
 }
-
-// userAccountSchema.methods.setFBdata = function(uid, data) {
-//   return new Promise((res, rej) => {
-//     if ('object' === typeof data) {
-//       if (data.id)
-//         this.set( { 'facebook' : { 'id' : data.id } } )
-//       if (data.email)
-//         this.set( { 'facebook' : { 'email' : data.email } } )
-//       if (data.name)
-//         this.set( { 'facebook' : { 'name' : data.name } } )
-//       if (data.token)
-//         this.set( { 'facebook' : { 'token' : data.token } } )
-//       this.save(function(err, doc){
-//         if (err) {
-//           console.log('error saving FB data: \n', err)
-//           return rej(err)
-//         }
-//         return res(doc)
-//       })
-//     } else {
-//       rej('FB data must be an object')
-//     }
-//   })
-// }
-
 
 /* 
   Give the user's unique ID created by the Voldata schema when 

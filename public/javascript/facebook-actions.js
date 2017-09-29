@@ -1,6 +1,7 @@
   let volOpts = {
     orgURL: 'http://www.casatravis.org',
-    image: 'http://www.casatravis.org/images/template/logo-300x.png'
+    image: 'http://www.casatravis.org/images/template/logo-300x.png',
+    hashtag: '#casatravis'
   }
   const fbQuote = document.getElementById('fb-quote');
   updateMetaTags(volOpts)
