@@ -85,6 +85,51 @@ userAccountSchema.methods.initUserAcct = function(email, password, callback) {
   })
 }
 
+userAccountModel.sendConfirmEmail = function(uid, email){
+  /* send an email to the user's new email address requesting confirmation 
+    submit post request to /user/api/email-update
+  */
+  return true
+}
+
+userAccountModel.setEmail = function(uid, email) {
+  return new Promise((res, rej) => {
+    userAccountModel.findOne({ 'userId' : uid  }, (err, userAcct) => {
+      if (err) {
+        console.log('error finding user data: ',err)
+        rej(err)
+      }
+      userAcct.set( { 'local' : { 'email' : email } } )
+      userAcct.save(function(err, doc){
+          if (err) {
+            console.log('error saving new email address: \n', err)
+            return rej(err)
+          }
+          return res(doc)
+        })
+    })
+  })
+}
+
+userAccountModel.setPassword = function(uid, password) {
+  return new Promise((res, rej) => {
+    userAccountModel.findOne({ 'userId' : uid  }, (err, userAcct) => {
+      if (err) {
+        console.log('error finding user data: ',err)
+        rej(err)
+      }
+      userAcct.set( { 'local' : { 'password' : password } } )
+      userAcct.save(function(err, doc){
+          if (err) {
+            console.log('error saving new password: \n', err)
+            return rej(err)
+          }
+          return res(doc)
+        })
+    })
+  })
+}
+
 /* save the user's Facebook data after they access the login dialog */
 userAccountModel.setFBdata = function(uid, data) {
   return new Promise((res, rej) => {

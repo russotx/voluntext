@@ -33,28 +33,50 @@
   <main class="container-fluid">
 
     <!-- Share content to Facebook -->
-    <section id="user-actions" class="d-flex row">
-      <div class="col-md-4">
-        <h5>Share your accomplishment on Facebook</h5>
-        <p class="instruct">*requires connection with your Facebook account</p>
+    <form id="user-actions" class="d-flex row">
+      <div class="col-md-6">
+        <h5>Recent Volunteer Activity</h5>
         <figure class="card">
           <div class="card-block">
             <!-- quote dialog api -->
-            <p id="new-vol-hours" class="fb-quotable ">This week I volunteered <span id='latest-hrs'></span> hours!</p>
+            <p id="new-vol-hours" class="fb-quotable ">This month you volunteered <span id='latest-hrs'></span> hours!</p>
           </div>
         </figure>
-        <!-- quote dialog api code will be inserted here -->
-        <div id="fb-quote" class="fb-quote" data-layout="quote"></div>
-        <p class="instruct">Just highlight the text in the box and click the pop-up flag!</p>
         <!-- share dialog api -->
-        <button id="fb-pub-btn" type="button">Post Hours To Facebook!</button>
+        <button class="form-btn" id="fb-pub-btn" type="button">Share on Facebook!</button>
         <!-- share dialog api code will be inserted here -->
         <div id="fb-res-msg"></div>
       </div>
-      <div class="col-md-4">
-        <h5>Report volunteer hours:</h5>
-        <input type="number">
-        <input type="submit">
+      <div class="col-md-6">
+        <form action="/user/api/hours-update" method="post">
+          <h5>Report Volunteer Hours</h5>
+          <div class="form-row">
+            <!-- <div class="col"> -->
+              <label for="month-list">Month volunteered:</label>
+              <select class="form-control" id="month-list">
+                <option>January</option>
+                <option>February</option> 
+                <option>March</option>
+                <option>April</option>
+                <option>May</option>
+                <option>June</option>
+                <option>July</option>
+                <option>August</option>
+                <option>September</option>
+                <option>October</option>
+                <option>November</option>
+                <option>December</option>
+              </select>
+            <!-- </div> -->
+          </div>
+          <div class="form-row">
+            <label for="new-hrs">Hours:</label>
+            <input class="sm-input" id="new-hrs" type="number" min="0" placeholder="0">
+          </div>
+          <div class="form-row">
+            <input id="report-hrs" type="submit">
+          </div>
+        </form>
       </div>
     </section>
 
@@ -63,7 +85,7 @@
       <hgroup class="col-md-12">
         <h5>Preferences</h5>
       </hgroup>
-      <section id="sms-opt" class="col-lg-4">
+      <section id="sms-opt" class="col-xl-3 col-lg-4 col-md-6">
         <header><p>Receive reminders via text message?</p></header>
         <label class="switch">
           <input type="checkbox" id="sms-radio">
@@ -74,30 +96,32 @@
           <p id="sms-no" class="slider-msg">No</p>
         </span>
       </section>
-      <section id="change-email" class="col-lg-4">
+      <section id="change-email" class="col-xl-3 col-lg-4 col-md-6">
         <header><p>Change Email:</p></header>
         <p class="instruct">*You will be sent a confirmation email</p>
-        <div class="label-input">
-          <label>new email</label>
-          <input id="new-email" type="email"><br>
-        </div>
-        <input id="new-email-btn" type="submit">
+        <form action="/user/api/email-update" method="post">
+          <div class="label-input">
+            <label>new email</label>
+            <input id="new-email" name="email" type="email"><br>
+          </div>
+          <input class="form-btn" id="new-email-btn" type="submit">
+        </form>
       </section>
-      <section id="change-pwd" class="col-lg-4">
+      <section id="change-pwd" class="col-xl-3 col-lg-4 col-md-6">
         <header><p>Change Password:</p></header>
         <div class="label-input">
           <label>new password</label>
-          <input id="pwd1" type="password">
+          <input id="pwd1" name="password1" type="password">
         </div>
         <div class="label-input">
           <label>confirm password</label>
-          <input id="pwd2" type="password">
+          <input id="pwd2" name="password2" type="password">
         </div>
-        <input id="new-pwd-btn" type="submit">
+        <input class="form-btn" id="new-pwd-btn" type="submit">
       </section>
-      <section id="conn-fb" class="col-lg-4">
+      <section id="conn-fb" class="col-xl-3 col-lg-4 col-md-6">
         <header><p>Connect Your Facebook Account:</p></header>
-          <button id="conn-fb-btn">Facebook</button>
+          <button class="form-btn" id="conn-fb-btn">Connect</button>
         </div>
       </section>
     </aside>

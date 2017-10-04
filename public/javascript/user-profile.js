@@ -9,6 +9,7 @@ const userPageLogic = {
   fbRedirect : 'http://localhost:3000/api/auth/facebook/onboard',
   orgURL : 'http://www.casatravis.org',
   orgHashtag : '#casatravis',
+  volHrsQuote : '',
   page : {
     smsRadio : document.getElementById('sms-radio'),
     smsSlider : document.getElementById('sms-slider'),
@@ -21,8 +22,7 @@ const userPageLogic = {
     username : document.getElementById('username'),
     connFbBtn : document.getElementById('conn-fb-btn'),
     fbQuote : document.getElementById('fb-quote'),
-    fbPubBtn : document.getElementById('fb-pub-btn'),
-     
+    fbPubBtn : document.getElementById('fb-pub-btn')
   },
   
   startWSConnection : function() {
@@ -60,6 +60,8 @@ const userPageLogic = {
     function processData(data) {
       Object.assign(_this.userData, data);
       let userData = _this.userData;
+      let reportingPeriod = userData.reportingPeriod || 'month';
+      _this.volHrsQuote = `I had the pleasure of volunteering ${userData.totalHours} hours this ${reportingPeriod}!`;
       _this.updateDOM(userData);
     }
     function showWSMessage(message) {
@@ -87,13 +89,6 @@ const userPageLogic = {
   }, // -- end updateDOM
   
   connectFacebook : function() {
-    // axios.get('/user/api/add-fb')
-    // .then(() => {
-    //   return true;
-    // })
-    // .catch((err) => {
-    //   console.log('error trying to connect FB: ', err);
-    // })
     let fbLogin = userPageLogic.fbLoginUrl;
     let appId = userPageLogic.fbAppId;
     let redirect = userPageLogic.fbRedirect;
@@ -182,7 +177,7 @@ const userPageLogic = {
       method: 'share',
       display: 'popup',
       href: _this.orgURL,
-      quote: _this.page.newVolHrs.textContent,
+      quote: _this.volHrsQuote,
       hashtag: _this.orgHashtag
     }, function(response){});
   }

@@ -9,7 +9,24 @@ const Schema = mongoose.Schema
 let logEntrySchema = new Schema({
   entryId: String,
   hours: Number,
-  timeStamp: String
+  timeStamp: String,
+  month: String
+})
+
+let monthlyHoursSchema = new Schema({
+    year: Number, /* the index */
+    January: Number,
+    February: Number,
+    March: Number,
+    April: Number,
+    May: Number,
+    June: Number,
+    July: Number,
+    August: Number,
+    September: Number,
+    October: Number,
+    November: Number,
+    December: Number
 })
 
 let volDataSchema = new Schema({
@@ -18,7 +35,8 @@ let volDataSchema = new Schema({
   phone: Number,
   smsOpt: Boolean,
   totalHours: Number,
-  hoursLog: [logEntrySchema]
+  hoursLog: [logEntrySchema],
+  
 })
 
 function newTimeStamp(){
@@ -56,7 +74,7 @@ volDataSchema.methods.initDoc = function(email, phone, smsOpt=false){
     })
 }
 
-volDataModel.logHours = function(userId, hours) {
+volDataModel.logHours = function(userId, hours, month) {
   return new Promise((res, rej) => {
     volDataModel.findOne( {'userId' : userId }, (err, user) => {
       if (err) {
@@ -67,8 +85,10 @@ volDataModel.logHours = function(userId, hours) {
       user.hoursLog.push({
         'entryId': this.email + ':' + timeStamp,
         'hours': hours,
-        'timeStamp': timeStamp
+        'timeStamp': timeStamp, 
+        'month': month
       })
+      user.monthlyHours.set( { month : hours} )
       user.totalHours = user.totalHours + hours
       let totalHours = user.totalHours
       user.save(function(err){

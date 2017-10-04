@@ -1,20 +1,6 @@
 p {
   margin-bottom: 0; }
 
-.instruct {
-  font-size: .8em;
-  color: #5F5F5F; }
-
-.label-input {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end; }
-
-#page-header {
-  padding-top: 10px;
-  background-color: #38AFFF;
-  color: white; }
-
 header {
   font-weight: bold; }
   header .username {
@@ -29,6 +15,25 @@ main {
 summary {
   padding-top: 20px;
   margin-bottom: 20px; }
+
+.instruct {
+  font-size: .8em;
+  color: #5F5F5F; }
+
+.label-input {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end; }
+
+.form-btn {
+  margin: 2px 0;
+  align-self: flex-end;
+  max-height: 30px; }
+
+#page-header {
+  padding-top: 10px;
+  background-color: #38AFFF;
+  color: white; }
 
 #user-actions {
   flex-direction: row;
@@ -63,12 +68,28 @@ summary {
   #preferences input {
     flex: 2;
     margin-left: 10px; }
-  #preferences #new-email-btn {
+  #preferences #conn-fb-btn {
+    align-self: center; }
+
+/*-------------------------------------------------- 
+                Dropdown
+--------------------------------------------------*/
+.form-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding: 2px 5px; }
+  .form-row label {
+    width: auto;
+    flex: 2; }
+  .form-row .sm-input {
     width: 25%;
-    align-self: flex-end; }
-  #preferences #new-pwd-btn {
-    width: 25%;
-    align-self: flex-end; }
+    min-width: 60px;
+    text-align: right; }
+  .form-row #month-list {
+    flex: 1.2; }
+    .form-row #month-list option {
+      font-size: .8em; }
 
 /*-------------------------------------------------- 
                   Toggle Switch 

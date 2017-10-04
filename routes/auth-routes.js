@@ -105,6 +105,7 @@ module.exports = (router, passport, root) => {
     res.json(res.locals.volData)
   })
 
+  // api route for volunteer to submit new hours  
   router.post('/user/api/hours-update', (req, res) => {
     let hours = req.body.hours
     let userId = req.user.userId
@@ -121,6 +122,32 @@ module.exports = (router, passport, root) => {
       console.log('error saving user hours: \n', err)
       res.json({ saved : false, error: err })
     })
+  })
+  
+  // api route for volunteer to change their associated email address
+  router.post('/user/api/email-update', (req, res) => {
+    let userId = req.user.userId
+    let email = req.body.email
+    UserAccount.sendConfirmEmail(userId, email)
+  })
+  // route for user confirming new email address is correct via sent email
+  router.post('/user/api/confirm-email', (req, res) => {
+    let userId = req.user.userId
+    let email = req.body.email
+    UserAccount.setEmail(userId, email)
+  })
+  
+  router.post('/user/api/password-update', (req, res) => {
+    let userId = req.user.userId
+    let password1 = req.body.password1
+    let password2 = req.body.password2
+    if (password1 === password2) {
+      UserAccount.setPassword(userId, password1)
+      .then(res.json( { saved: true } ))
+      .catch((err) => {
+        res.json( { saved: false, error: err } )
+      })
+    }
   })
   
   // -- Volunteer opt in/out of sms texting 
