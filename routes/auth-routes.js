@@ -1,8 +1,14 @@
-/****  Authentication & protected routes   *****/
+/************************************************************************* 
+ * 
+ *              AUTHENTICATION & PROTECTED ROUTES   
+ * 
+ *************************************************************************/
+
 const path = require('path')
 require('dotenv').config()
+const moment = require('moment')
 const onboardUser = require('../config/newuser-config')
-const VolDataDoc = require('../models/voldata-db')
+const VolDataDoc = require('../models/voldata-db').volData
 const UserAccount = require('../models/user-account')
 const wsServer = require('../wsServer')
 const FB = require('../config/facebook-helper').makeFBloginHelper
@@ -20,16 +26,15 @@ const facebookOptions = {
 
 module.exports = (router, passport, root) => {
   
-  // -- ROUTER MIDDLEWARE --
-  router.use('/user',isLoggedIn)
-  router.use('/user',getUserData)
-  router.use('/admin',isAdmin)
+  /* -- ROUTER MIDDLEWARE -- */
+  router.use('/user', isLoggedIn)
+  router.use('/admin', isAdmin)
 
   /*************************************************************************
                 -- AUTHENTICATION ROUTES --
   ***********************************************************************/
 
-  // Local User/Password Authentication Route
+  /* Local User/Password Authentication Route  */
   router.post('/api/auth', passport.authenticate('local-login', authOptions), 
     (req, res) => {
       if (req.user.userId === process.env.ADMINID) {
@@ -39,7 +44,7 @@ module.exports = (router, passport, root) => {
       }
     })
 
-  // Facebook Authentication Routes
+  /* Facebook Authentication Routes */
   router.get('/api/auth/facebook', passport.authenticate('facebook'))
   /* Facebook Authentication Redirect Route
       - callback for facebook strategy is called & 
@@ -59,8 +64,8 @@ module.exports = (router, passport, root) => {
             -- VOLUNTEER USER ROUTES --
 ************************************************************************/
 
-  // -- Volunteer Profile Page 
-  router.get('/user/profile', (req, res, next) => {
+  /* -- Volunteer Profile Page  */
+  router.get('/user/profile', getUserData, (req, res, next) => {
 /*      The client triggers a WebSocket connection which then triggers 
         sending the user's data to the user via WebSocket                     */
     res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'), 
@@ -99,44 +104,71 @@ module.exports = (router, passport, root) => {
     })
   })
   
-    
-  // api route for client access to user data
+  /* api route for client access to user data */
   router.get('/user/api/data', (req, res) => {
     res.json(res.locals.volData)
   })
 
-  // api route for volunteer to submit new hours  
+  /** 
+   * api route for volunteer to submit new hours 
+   *  - updates the annual logs collection
+   *  - updates the user's hoursLog
+   *  
+   */
   router.post('/user/api/hours-update', (req, res) => {
-    let hours = req.body.hours
+    let thisYear = moment().year()
+    let thisMonth = moment().format('MMMM')
+    let inputData = {
+      'hours': req.body.hours,
+      'month': req.body.month,
+      'year': req.body.year
+    }
     let userId = req.user.userId
-    VolDataDoc.logHours(userId, hours)
-    .then((totalHours) => {
-      if (wsServer.userSockets[userId]) {
-        wsServer.userSockets[userId].sendValidData(totalHours)
-      } else {
-        console.log('no user websocket connection')
+    /* update the database */
+    VolDataDoc.logHours(userId, inputData)
+    /* respond to the client if the user profile page needs to be updated */
+    .then((userLog) => {
+      let dataForClient = { result : 'success' }
+      /* only send an update to the client if the user is logging data for this year */
+      if (thisYear == inputData.year) {
+        dataForClient.totalHours = userLog.annualTotal
+        /* check if client needs to update display of hours for this month, 
+          this is also important for updating the FB quote */
+        if (thisMonth === inputData.month) {
+          dataForClient.thisMonthHours = userLog[thisMonth].hours 
+        }
       }
-      res.json({ saved : true, totalHours : totalHours })
+      /* send update via websocket if one exists */
+      if (wsServer.userSockets[userId]) {
+        wsServer.userSockets[userId].sendValidData(dataForClient) 
+      } else {
+      /* send a json response in case there's no websocket connection */
+        console.log('no user websocket connection')
+        res.json({ saved : true, updatedData : dataForClient }) 
+      } 
     })
+    /* handle error trying to update hours in the log */
     .catch((err) => {
-      console.log('error saving user hours: \n', err)
+      console.log('ERROR saving user hours in hours-update route: \n', err)
       res.json({ saved : false, error: err })
     })
   })
   
-  // api route for volunteer to change their associated email address
+/* api route for volunteer to change their associated email address */
   router.post('/user/api/email-update', (req, res) => {
     let userId = req.user.userId
     let email = req.body.email
     UserAccount.sendConfirmEmail(userId, email)
   })
-  // route for user confirming new email address is correct via sent email
+  
+/* api route for user confirming new email address is correct via sent email */
   router.post('/user/api/confirm-email', (req, res) => {
     let userId = req.user.userId
     let email = req.body.email
     UserAccount.setEmail(userId, email)
   })
-  
+ 
+ /* api route for user changing their password */ 
   router.post('/user/api/password-update', (req, res) => {
     let userId = req.user.userId
     let password1 = req.body.password1
@@ -150,7 +182,7 @@ module.exports = (router, passport, root) => {
     }
   })
   
-  // -- Volunteer opt in/out of sms texting 
+  /* -- Volunteer opt in/out of sms texting   */
   router.post('/user/api/sms-opt', (req, res) => {
     let smsChoice = req.body.smsOpt
     let userId = req.user.userId
@@ -175,16 +207,16 @@ module.exports = (router, passport, root) => {
     failureFlash: true
   }
   
-  // -- Admin Onboarding Volunteers Route -- 
+  /*  -- Admin Onboarding Volunteers Route -- */
   router.post('/admin/api/onboard', onboardUser(onboardOptions))
   
-  // -- Admin Volunteer Onboarding Page --
+  /* -- Admin Volunteer Onboarding Page -- */
   router.get('/admin/onboard', (req, res) => {
     console.log('going to onboard page')
     res.sendFile(path.join(root,'secured','views','onboard.html'))
   })
 
-  // -- Admin Dashboard Page --
+  /* -- Admin Dashboard Page -- */
   router.get('/admin/dashboard', (req, res) => {
     console.log('going to admin page')
     res.sendFile(path.join(root, 'secured', 'views', 'admin-page.html'))
@@ -211,8 +243,7 @@ function isAdmin(req, res, next) {
 }
 
 function isLoggedIn(req, res, next) {
-  // checks if req.user exists
-  console.log('res.locals: \n', res.locals)
+  /* checks if req.user exists */
   if (req.isAuthenticated()) {
     console.log('auth check: user is logged in')
     return next()
@@ -223,14 +254,12 @@ function isLoggedIn(req, res, next) {
 }
 
 function getUserData(req, res, next) {
-  // get the user data from voldata db and attach to res.locals
+  /* get the user data from voldata db and attach to res.locals */
   let userId = req.user.userId
-  console.log('middleware- userId: ', userId)
-  console.log('mw begin... res.locals: \n', res.locals)
   VolDataDoc.findOne( { 'userId': userId }, (err, userData) => {
     if (err) {
-      console.log('error finding user data.')
-      // later test if (volData.err) to see if successfully retrieved
+      console.log('error finding user data: \n', err)
+      /* need to test later if (volData.err) to see if successfully retrieved */
       res.locals.volData.err = true
       return next()
     } 
@@ -242,7 +271,6 @@ function getUserData(req, res, next) {
     if (userData) {
       console.log('user data found')
       res.locals.volData = userData
-      console.log('mw res.locals assigned... res.locals = \n', res.locals)
       return next()
     }
   })  

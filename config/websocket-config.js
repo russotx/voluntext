@@ -1,6 +1,6 @@
 /*
 *
-*   CONFIGURE A WEBSOCKET SERVER
+*   CONFIGURE THE WEBSOCKET SERVER BEHAVIOR
 *
 */
 
@@ -13,23 +13,23 @@ module.exports = (wsServer) => {
         socket = the WebSocket instance
         req = the request object (not the same as the req to http server)  
     */
-    // used the sesssion parser in ws Server so we have access to session data
+    // use the sesssion parser in ws Server for access to session data
     let userId = req.session.passport.user
     socket.userId = userId
     // add reference to the socket on the Server with userId as key
     wsServer.userSockets[userId] = socket
     
-    console.log(`ws user: \n ${userId}`)
+    //console.log(`ws user: \n ${userId}`)
     console.log('SOCKET CONNECTION CREATED.')
     
-    console.log('socket: attempting to get user data...')
+    //console.log('socket: attempting to get user data...')
     socket.sendUserData(userId)
     socket.emit('tester')
     
     // incoming message from client received
     socket.on('message', (message) => {
-      console.log(`WS message: ${message} \n from user: ${userId}`)
-    })
+      console.log(`WS message: ${message} \n  - from user: ${userId}`)
+    }) 
 
     // socket instance closed
     socket.on('close', (code, reason) => {
@@ -41,7 +41,7 @@ module.exports = (wsServer) => {
   
   // WebSocket Server error
   wsServer.on('error',(err) => {
-    console.log('error with websocket server: ',err)
+    console.log('error with websocket server: ', err)
   })
 
   // WebSocket Server is running and listening for connections

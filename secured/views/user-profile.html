@@ -25,15 +25,15 @@
   </header>
   <summary class="row">
     <div class="col-md-12">
-      <h5>Total Hours Volunteered: <span id='total-hours'></span></h5>
+      <h5>Total Hours Volunteered This Year: <span id='total-hours'></span></h5>
     </div>
   </summary>
 
   <!-- the main body: begin content -->
   <main class="container-fluid">
 
-    <!-- Share content to Facebook -->
-    <form id="user-actions" class="d-flex row">
+    <section id="user-actions" class="d-flex row">
+      <!-- Share content to Facebook -->
       <div class="col-md-6">
         <h5>Recent Volunteer Activity</h5>
         <figure class="card">
@@ -47,13 +47,14 @@
         <!-- share dialog api code will be inserted here -->
         <div id="fb-res-msg"></div>
       </div>
+      <!-- Update volunteer hours -->
       <div class="col-md-6">
         <form action="/user/api/hours-update" method="post">
           <h5>Report Volunteer Hours</h5>
           <div class="form-row">
             <!-- <div class="col"> -->
               <label for="month-list">Month volunteered:</label>
-              <select class="form-control" id="month-list">
+              <select class="form-control" id="month-list" name="month">
                 <option>January</option>
                 <option>February</option> 
                 <option>March</option>
@@ -71,10 +72,14 @@
           </div>
           <div class="form-row">
             <label for="new-hrs">Hours:</label>
-            <input class="sm-input" id="new-hrs" type="number" min="0" placeholder="0">
+            <input class="sm-input" id="new-hrs" name="hours" type="number" min="0" placeholder="0">
           </div>
           <div class="form-row">
-            <input id="report-hrs" type="submit">
+            <label for="hrs-year">Year:</label>
+            <input class="sm-input" id="hrs-year" name="year" type="number" min="1990" placeholder="YYYY">
+          </div>
+          <div class="form-row">
+            <input id="report-hrs" type="submit" value="Submit">
           </div>
         </form>
       </div>

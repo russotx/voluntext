@@ -1,5 +1,6 @@
 const UserAccount = require('../models/user-account')
-const VolDataDoc = require('../models/voldata-db')
+const VolDataDoc = require('../models/voldata-db').volData
+const AnnualLogsDoc = require('../models/voldata-db').annualLogs
 
  function handleNewUserErrors(err, userProps) {
   let cleanupStart = err.newUserStep

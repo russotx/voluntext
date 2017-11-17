@@ -36,8 +36,6 @@ let userAccountSchema = new Schema({
   }
 })
 
-const userAccountModel = authDBconnection.model('UserAccount', userAccountSchema)
-
 /*************************************************************************    
           -- Password hashing and checking --
 *************************************************************************/
@@ -85,6 +83,31 @@ userAccountSchema.methods.initUserAcct = function(email, password, callback) {
   })
 }
 
+/* 
+  Give the user's unique ID created by the Voldata schema when 
+  initializing the user's entry in the volunteer data DB
+*/
+userAccountSchema.methods.setUserId = function(userId, callback){
+  this.set( { 'userId': userId } )
+  this.save(function(err, doc){
+    if (err) {
+      err.newUserStep = 3
+      err.stepMessage = 'Error creating user ID for user in the authentication DB.'
+      if (callback) 
+        return callback(err) // pass the callback with err
+      return Promise.reject(err) // let newuser-config handle the error 
+    }
+    else {
+      if (callback) 
+        return callback(doc) // pass the callback with err
+      return Promise.resolve( doc )
+    }
+  })
+} 
+
+
+const userAccountModel = authDBconnection.model('UserAccount', userAccountSchema)
+
 userAccountModel.sendConfirmEmail = function(uid, email){
   /* send an email to the user's new email address requesting confirmation 
     submit post request to /user/api/email-update
@@ -99,14 +122,19 @@ userAccountModel.setEmail = function(uid, email) {
         console.log('error finding user data: ',err)
         rej(err)
       }
-      userAcct.set( { 'local' : { 'email' : email } } )
-      userAcct.save(function(err, doc){
+      if (!userAcct) {
+        rej('invalid user')
+      }
+      if (userAcct) {
+        userAcct.set( { 'local' : { 'email' : email } } )
+        userAcct.save(function(err, doc){
           if (err) {
             console.log('error saving new email address: \n', err)
             return rej(err)
           }
           return res(doc)
         })
+      }
     })
   })
 }
@@ -118,14 +146,20 @@ userAccountModel.setPassword = function(uid, password) {
         console.log('error finding user data: ',err)
         rej(err)
       }
-      userAcct.set( { 'local' : { 'password' : password } } )
-      userAcct.save(function(err, doc){
+      if (!userAcct){
+        rej('invalid user')
+      }
+      if (userAcct) {
+        userAcct.set( { 'local' : { 'password' : password } } )
+        userAcct.save(function(err, doc){
           if (err) {
             console.log('error saving new password: \n', err)
-            return rej(err)
+            rej(err)
+          } else {
+            res(doc)
           }
-          return res(doc)
         })
+      }
     })
   })
 }
@@ -160,29 +194,6 @@ userAccountModel.setFBdata = function(uid, data) {
     })
   })
 }
-
-/* 
-  Give the user's unique ID created by the Voldata schema when 
-  initializing the user's entry in the volunteer data DB
-*/
-userAccountSchema.methods.setUserId = function(userId, callback){
-  this.set( { 'userId': userId } )
-  this.save(function(err, doc){
-    if (err) {
-      err.newUserStep = 3
-      err.stepMessage = 'Error creating user ID for user in the authentication DB.'
-      if (callback) 
-        return callback(err) // pass the callback with err
-      return Promise.reject(err) // let newuser-config handle the error 
-    }
-    else {
-      if (callback) 
-        return callback(doc) // pass the callback with err
-      return Promise.resolve( doc )
-    }
-  })
-} 
-
 
 // export the model for the user account for authentication purposes
 module.exports = userAccountModel /* authDBconnection.model('UserAccount', userAccountSchema) */
