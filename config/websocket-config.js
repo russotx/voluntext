@@ -13,13 +13,13 @@ module.exports = (wsServer) => {
         socket = the WebSocket instance
         req = the request object (not the same as the req to http server)  
     */
-    // use the sesssion parser in ws Server for access to session data
+    /* uses the sesssion parser in ws Server for access to session data */
     let userId = req.session.passport.user
     socket.userId = userId
-    // add reference to the socket on the Server with userId as key
+    /* add reference to the socket on the Server with userId as key */
     wsServer.userSockets[userId] = socket
     
-    //console.log(`ws user: \n ${userId}`)
+    console.log(`ws user: \n ${userId}`)
     console.log('SOCKET CONNECTION CREATED.')
     
     //console.log('socket: attempting to get user data...')
