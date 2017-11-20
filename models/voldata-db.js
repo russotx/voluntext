@@ -6,6 +6,7 @@ mongoose.Promise = global.Promise
 /* import mongoose connection to volunteer data database */
 const dataDBconnection = require('../config/mongoose-config').dataDBconn
 const Schema = mongoose.Schema
+let adminUser = "admin"
 
 /*****************************************************************************
                     -- Annual Logs Schema --
@@ -106,16 +107,66 @@ let annualLogsModel = dataDBconnection.model('AnnualHoursLogs',
                                                 annualLogsSchema)
 
 annualLogsModel.fetchUserLogByYear = function(email, year) {
-  console.log('attempting fetchUserLogByYear')
   return new Promise((res, rej) => {
     annualLogsModel.findOne({'user': email, 'year': year}, (err, data) => {
       if (err) return rej(err)    
-      console.log(`fetchUserLogByYear user ${email}, year ${year} ${typeof year}`)
-     // console.log('fetchUserLogByYear data: \n', data)
       return res(data)
     })
   })
 }
+
+annualLogsModel.getAdminDashboardData = function() {
+  let thisYear = moment().year()
+  let thisMonth = moment().format("MMMM")
+  let returnProps = `annualTotal ${thisMonth}` 
+  return new Promise((res, rej) => {
+    let sumHours = { totalAllHours : 0, totalThisMonthHours : 0 }
+    annualLogsModel.find({ 'year' : thisYear }, returnProps).cursor()
+      .on('data', function(doc){
+        sumHours.totalAllHours += doc.annualTotal   
+        sumHours.totalThisMonthHours += doc[thisMonth].hours
+      })
+      .on('end', function(){
+        res(sumHours)           
+      })
+      .on('error', function(error){
+        rej(error)
+      })
+  }) 
+}
+
+annualLogsModel.getAllHoursByTime = function(value, unit) {
+  return new Promise((res, rej) => {
+    let sumHours = 0
+    if (unit === "year") {
+      annualLogsModel.find({ 'year' : value }, 'annualTotal').cursor()
+        .on('data', function(doc){
+          sumHours += doc.annualTotal   
+        })
+        .on('end', function(){
+          res(sumHours)           
+        })
+        .on('error', function(error){
+          rej(error)
+        })
+    }
+    if (unit === "month") {
+      let monthToReturn = value
+      let thisYear = moment().year()
+      annualLogsModel.find({ 'year' : thisYear }, monthToReturn).cursor() 
+        .on('data', function(doc) {
+          sumHours += doc[monthToReturn].hours 
+        })
+        .on('end', function(){
+          res(sumHours)
+        })
+        .on('error', function(error){
+          rej(error)
+        })
+    }
+  })    
+}
+
 /*******************************************************************************
                            -- Vol Data Schema --
                            
@@ -186,6 +237,45 @@ let volDataModel = dataDBconnection.model('VolDataDoc', volDataSchema)
 /*------------------------------------------------------------------------------
                   -- Functions for the Volunteer Data Model --
 ------------------------------------------------------------------------------*/
+
+/**
+ *  getter to obtain main account data for a user by their userId
+ *  creates an object from the data for the user from voldata db
+ *    adds the total hours for this year as a property 
+ *    adds the total hours for this month as a property 
+ * @param {String} userId the user's unique hashed Id 
+ * 
+ */
+volDataModel.getUserData = function(userId) {
+  let thisYear = moment().year()
+  let thisMonth = moment().format("MMMM")
+  let collectedData = {}
+  return new Promise((res, rej) => {
+    volDataModel.findOne( { 'userId': userId }, (err, userData) => {
+      if (err) {
+        console.log('error finding user data.')
+        return rej(err)
+      } 
+      if (!userData) {
+        console.log('no user data found') 
+        return res('no user data found')
+      }
+      if (userData) {
+        Object.assign(collectedData, userData._doc)
+        annualLogsModel.fetchUserLogByYear(userData.email, thisYear)
+        .then((thisYearLog) => {
+          collectedData.totalHours = thisYearLog.annualTotal || 0
+          collectedData.thisMonthHours = thisYearLog[thisMonth].hours || 0  
+          return res(collectedData)
+        })
+        .catch((error) => {
+          return rej(error)
+        })
+      }
+    }) /* end of findOne */  
+  }) /* end of returned Promise */  
+}
+
 /** 
 *  setter to log hours for the volunteer 
 *  @param {String} userId - for the volunteer (an email address)
@@ -213,8 +303,14 @@ volDataModel.logHours = function(userId, volData) {
             if (userLog) {
               /* an entry exists, update the month field in the existing entry */
               console.log(`A user log for ${year} exists.`)
-              /* updateMonthHours performs a save of the model after changing data */
+              /* updateMonthHours performs a save of the model after changing data and returns a promise */
               userLog.updateMonthHours(month, hours)
+              .then(() => {
+                res(userLog)
+              })
+              .catch((err) => {
+                rej(err)
+              })
             } else {
               /* no entry exists, need to initialize a new log document in the 
                 Annual Logs collection */
@@ -234,10 +330,11 @@ volDataModel.logHours = function(userId, volData) {
                   }
                 })
               })
+              .then(() => {
+                console.log('successful update of the user log in logHours: \n', userLog)
+                res(userLog)    
+              })
             }
-            /* hours were successfully saved pass the userLog */
-            console.log('successful update of the user log in logHours: \n', userLog)
-            res(userLog)
           })
         }
     })
@@ -264,6 +361,7 @@ volDataModel.setSMSopt = function(userId, option) {
     })
   })
 }
+
 
 // export the models for storing volunteer related data
 exports.volData = volDataModel

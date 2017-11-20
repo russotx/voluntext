@@ -127,7 +127,7 @@ module.exports = (router, passport, root) => {
     /* update the database */
     VolDataDoc.logHours(userId, inputData)
     /* respond to the client if the user profile page needs to be updated */
-    .then((userLog) => {
+    .then((userLog) => { 
       let dataForClient = { result : 'success' }
       /* only send an update to the client if the user is logging data for this year */
       if (thisYear == inputData.year) {
@@ -146,6 +146,8 @@ module.exports = (router, passport, root) => {
         console.log('no user websocket connection')
         res.json({ saved : true, updatedData : dataForClient }) 
       } 
+      /* emit new hours event to trigger update to admin dashboard */
+      wsServer.emit('new-hours') 
     })
     /* handle error trying to update hours in the log */
     .catch((err) => {
