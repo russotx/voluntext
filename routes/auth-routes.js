@@ -104,16 +104,10 @@ module.exports = (router, passport, root) => {
     })
   })
   
-  /* api route for client access to user data */
-  // router.get('/user/api/data', (req, res) => {
-  //   res.json(res.locals.volData)
-  // })
-
   /** 
    * api route for volunteer to submit new hours 
    *  - updates the annual logs collection
    *  - updates the user's hoursLog
-   *  
    */
   router.post('/user/api/hours-update', (req, res) => {
     let thisYear = moment().year()
@@ -255,25 +249,3 @@ function isLoggedIn(req, res, next) {
   }
 }
 
-// function getUserData(req, res, next) {
-//   /* get the user data from voldata db and attach to res.locals */
-//   let userId = req.user.userId
-//   VolDataDoc.findOne( { 'userId': userId }, (err, userData) => {
-//     if (err) {
-//       console.log('error finding user data: \n', err)
-//       /* need to test later if (volData.err) to see if successfully retrieved */
-//       res.locals.volData.err = true
-//       return next()
-//     } 
-//     if (!userData) {
-//       console.log('no user data found') 
-//       res.locals.volData = null
-//       return next()
-//     }
-//     if (userData) {
-//       console.log('user data found')
-//       res.locals.volData = userData
-//       return next()
-//     }
-//   })  
-// }
