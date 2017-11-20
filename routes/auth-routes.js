@@ -65,7 +65,7 @@ module.exports = (router, passport, root) => {
 ************************************************************************/
 
   /* -- Volunteer Profile Page  */
-  router.get('/user/profile', getUserData, (req, res, next) => {
+  router.get('/user/profile', (req, res, next) => {
 /*      The client triggers a WebSocket connection which then triggers 
         sending the user's data to the user via WebSocket                     */
     res.sendFile(path.join(root, 'secured', 'views', 'user-profile.html'), 
@@ -105,9 +105,9 @@ module.exports = (router, passport, root) => {
   })
   
   /* api route for client access to user data */
-  router.get('/user/api/data', (req, res) => {
-    res.json(res.locals.volData)
-  })
+  // router.get('/user/api/data', (req, res) => {
+  //   res.json(res.locals.volData)
+  // })
 
   /** 
    * api route for volunteer to submit new hours 
@@ -255,25 +255,25 @@ function isLoggedIn(req, res, next) {
   }
 }
 
-function getUserData(req, res, next) {
-  /* get the user data from voldata db and attach to res.locals */
-  let userId = req.user.userId
-  VolDataDoc.findOne( { 'userId': userId }, (err, userData) => {
-    if (err) {
-      console.log('error finding user data: \n', err)
-      /* need to test later if (volData.err) to see if successfully retrieved */
-      res.locals.volData.err = true
-      return next()
-    } 
-    if (!userData) {
-      console.log('no user data found') 
-      res.locals.volData = null
-      return next()
-    }
-    if (userData) {
-      console.log('user data found')
-      res.locals.volData = userData
-      return next()
-    }
-  })  
-}
+// function getUserData(req, res, next) {
+//   /* get the user data from voldata db and attach to res.locals */
+//   let userId = req.user.userId
+//   VolDataDoc.findOne( { 'userId': userId }, (err, userData) => {
+//     if (err) {
+//       console.log('error finding user data: \n', err)
+//       /* need to test later if (volData.err) to see if successfully retrieved */
+//       res.locals.volData.err = true
+//       return next()
+//     } 
+//     if (!userData) {
+//       console.log('no user data found') 
+//       res.locals.volData = null
+//       return next()
+//     }
+//     if (userData) {
+//       console.log('user data found')
+//       res.locals.volData = userData
+//       return next()
+//     }
+//   })  
+// }
