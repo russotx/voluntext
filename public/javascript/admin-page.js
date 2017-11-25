@@ -2,7 +2,10 @@ const adminPageLogic = {
   page : {
     wsMessages : document.getElementById('messages'),
     monthHours : document.getElementById('month-hours'),
-    yearHours : document.getElementById('year-hours')
+    yearHours : document.getElementById('year-hours'),
+    message : document.getElementById('message'),
+    smsTag : document.getElementById('sms-tag'),
+    sendSMSBtn : document.getElementById('send-sms')
   }
 }
 
@@ -13,6 +16,23 @@ adminPageLogic.updateDOM = function(elements) {
   if (elements.totalThisMonthHours) {
     this.page.monthHours.textContent = elements.totalThisMonthHours
   }
+}
+
+adminPageLogic.sendAllSMS = function() {
+  let message = this.page.message.value;
+  let tag = this.page.smsTag.value;
+  let msgData = { 
+    'text' : message, 
+    'tag' : tag 
+  }
+  console.log('message data: \n', msgData);
+  axios.post('/admin/api/send-all-sms', msgData)
+  .then((response) => {
+    console.log('success sending SMS: ', response);
+  })
+  .catch((err) => {
+    console.log('error sending SMS: ', err);
+  })
 }
 
 adminPageLogic.startWSConnection = function() {
@@ -68,7 +88,12 @@ adminPageLogic.startWSConnection = function() {
 } // -- end startWSConnection()
 
 adminPageLogic.init = function() {
+  let _this = this;
   this.startWSConnection();
+  this.page.sendSMSBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    _this.sendAllSMS();
+  });
 }
 
 adminPageLogic.init();

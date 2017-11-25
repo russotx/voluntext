@@ -276,16 +276,51 @@ volDataModel.getUserData = function(userId) {
   }) /* end of returned Promise */  
 }
 
+volDataModel.getUserByPhone = function(userPhone) {
+  return new Promise((res, rej) => {
+    volDataModel.findOne({ phone : userPhone }, 'userId', (err, userData) => {
+      if (err) return rej(err)
+      if (userData) return res(userData.userId)
+      return res(false)
+    })
+  })
+}
+
+volDataModel.validateSMSopt = function(phone) {
+  volDataModel.findOne({ phone : phone }, 'smsOpt', (err, doc) => {
+    if (err) return Promise.reject(err)
+    if (doc) return Promise.resolve(doc.smsOpt)
+    return Promise.reject('no phone number found')
+  })
+}
+
+volDataModel.getAllSMSnumbers = function() {
+  let allNumbers = []
+  return new Promise((res, rej) => {
+    volDataModel.find({ 'smsOpt' : true }, 'phone').cursor()
+    .on('data', function(doc) {
+      allNumbers.push(`+1${doc.phone}`)
+    })  
+    .on('error', function(error) {
+      rej(error)
+    })
+    .on('end', function() {
+      res(allNumbers)
+    })
+  })
+  
+}
+
 /** 
 *  setter to log hours for the volunteer 
 *  @param {String} userId - for the volunteer (an email address)
-*  @param {Object} volData - the month/year/hours for the log
+*  @param {Object} dataForLog - the month/year/hours for the log
 *    - updates the hours in a log or creates a new log if needed 
 */
-volDataModel.logHours = function(userId, volData) {
-  let month = volData.month
-  let year = parseInt(volData.year, 10)
-  let hours = parseInt(volData.hours, 10)
+volDataModel.logHours = function(userId, dataForLog) {
+  let month = dataForLog.month
+  let year = parseInt(dataForLog.year, 10)
+  let hours = parseInt(dataForLog.hours, 10)
   return new Promise((res, rej) => {
     /* ensure a document for the volunteer exists in Vol Data collection */
     volDataModel.findOne( { 'userId' : userId }, (err, user) => {
@@ -317,7 +352,7 @@ volDataModel.logHours = function(userId, volData) {
               console.log(`user log for ${year} DOES NOT EXIST, initializing new log...`)
               userLog = new annualLogsModel()
               /* .init resolves with the id for the new log document */
-              userLog.initLog(userEmail, volData)
+              userLog.initLog(userEmail, dataForLog)
               .then((docId) => {
                 /* add the _id for the new log to the user's array of log ids in 
                   the Vol Data collection */

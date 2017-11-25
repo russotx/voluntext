@@ -12,6 +12,7 @@ const VolDataDoc = require('../models/voldata-db').volData
 const UserAccount = require('../models/user-account')
 const wsServer = require('../wsServer')
 const FB = require('../config/facebook-helper').makeFBloginHelper
+const bwClient = require('../config/bandwidth-config')
 
 /* options for .allFailed() or .success()--req.login() */
 const authOptions = {
@@ -206,6 +207,54 @@ module.exports = (router, passport, root) => {
   /*  -- Admin Onboarding Volunteers Route -- */
   router.post('/admin/api/onboard', onboardUser(onboardOptions))
   
+  /* -- Admin Send SMS Requesting Hours -- */  
+  router.post('/admin/api/send-sms', (req, res) => {
+    let messageOpts = req.body
+    VolDataDoc.validateSMSopt(messageOpts.to)
+    .then((smsOpt) => {
+      if (smsOpt) {
+        bwClient.sendSMS(messageOpts, (err, bwRes, body) => {
+          if (err) {
+            console.log('bwClient "request" error: \n', err)
+            return res.send(err)
+          }
+          console.log('bwClient response: \n', bwRes)
+          return res.json(bwRes)
+        })
+      } else {
+          return res.json({ 'success' : false, 
+                          'reason' : 'user has not opted in to SMS messages' } )  
+      }
+    })
+    .catch((err) => {
+      console.log('error validating smsOpt: ', err)
+      return res.json( { 'success' : false, 'reason' : err } )
+    })
+  })
+  
+  /* -- Admin Send SMS Requesting Hours To All Opted-In Numbers -- */  
+  router.post('/admin/api/send-all-sms', (req, res) => {
+    let messageOpts = req.body
+    VolDataDoc.getAllSMSnumbers()
+    .then((optInNums) => {
+      messageOpts.to = optInNums
+      bwClient.sendSMS(messageOpts, (err, bwRes, body) => {
+        if (err) {
+          console.log('*** auth routes- bwClient "request" error: \n', err)
+          return res.send(err)
+        }
+        //console.log('bwClient response: \n', bwRes)
+        console.log('*** auth routes- bwClient body: \n', body)
+        return res.json(bwRes)
+      })
+    })
+    .catch((err) => {
+      console.log('error getting all sms optin numbers: ', err)
+      return res.json(err)
+    })
+  })
+ 
+
   /* -- Admin Volunteer Onboarding Page -- */
   router.get('/admin/onboard', (req, res) => {
     console.log('going to onboard page')
