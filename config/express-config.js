@@ -5,13 +5,12 @@ const path = require('path') // Node path library
 const bodyParser = require('body-parser') // HTTP body parser
 const flash = require('connect-flash') // session messages
 const morgan = require('morgan') // auto logger
-
 const express = require('express')
-
 const passport = require('passport')
-// CONFIGURE PASSPORT FOR SESSIONS AND AUTHENTICATION
-require('./passport-config')(passport)
 
+/* CONFIGURE PASSPORT FOR SESSIONS AND AUTHENTICATION */
+require('./passport-config')(passport)
+/* Import the session parsers for use in the Express App */
 const sessionParser = require('./sessions-config')
 
 const proxyLevels = 1 // number of proxy levels to trust

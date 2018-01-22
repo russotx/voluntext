@@ -4,21 +4,25 @@ require('dotenv').config() // pull in environment variables
 const express = require('express') // request listener
 const app = express() // create Express app instance
 
-// --- CREATE HTTP SERVER ---
-// use the express.js app as the requestListener
+/* Heroku sets the PORT environment variable for you */
+const HttpPort = process.env.PORT
+
+/* --- CREATE HTTP SERVER ---
+   use the express.js app as the requestListener 
+*/
 const httpServer = http.createServer(app)
-// export httpServer needed for use in the Websocket server
+/* export httpServer needed for use in the Websocket server */
 module.exports = httpServer
 
-// -- CREATE WEBSOCKET SERVER --
+/* -- CREATE WEBSOCKET SERVER --  */
 const wsServer = require('./wsServer')
-// -- CONFIGURE WEBSOCKET SERVER
+/* -- CONFIGURE WEBSOCKET SERVER  */
 require('./config/websocket-config')(wsServer)
-// -- CONFIGURE EXPRESS APP
+/* -- CONFIGURE EXPRESS APP */
 require('./config/express-config')(app, root)
 
-// -- LISTEN FOR CONNECTIONS --
-httpServer.listen(process.env.PORT, (err) => {
+/* -- LISTEN FOR CONNECTIONS --  */
+httpServer.listen(HttpPort, (err) => {
   if (err) {
     console.log('error starting http server')
     return false
