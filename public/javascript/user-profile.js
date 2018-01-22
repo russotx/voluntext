@@ -1,13 +1,21 @@
+const config = {
+  ORG_URL : 'https://casatravis.org',
+  ORG_HASH : 'casatravis',
+  FACEBOOK_APP_ID : '2360172457541198',
+  APP_DOMAIN : 'https://voluntext.herokuapp.com',
+  FACEBOOK_CALLBACK_URL_OB : `${config.APP_DOMAIN}/api/auth/facebook/proceed`,
+  WEBSOCKET_URL : location.origin.replace(/^http/, 'ws')
+}
 
 const userPageLogic = {
   userData : {},
   ws : null,
   smsProcessing : false,
   fbLoginUrl : 'https://www.facebook.com/v2.10/dialog/oauth',
-  fbAppId : '2360172457541198',
-  fbRedirect : 'http://localhost:3000/api/auth/facebook/onboard',
-  orgURL : 'http://www.casatravis.org',
-  orgHashtag : '#casatravis',
+  fbAppId : config.FACEBOOK_APP_ID,
+  fbRedirect : config.FACEBOOK_CALLBACK_URL_OB,
+  orgURL : config.ORG_URL,
+  orgHashtag : `#${config.ORG_HASHTAG}`,
   FBhrsQuote : '',
   page : {
     smsRadio : document.getElementById('sms-radio'),
@@ -65,7 +73,7 @@ userPageLogic.startWSConnection = function() {
     ws.close();  
     return new Promise.resolve(false);
   } else {
-    ws = new WebSocket('ws://localhost:3000');
+    ws = new WebSocket(config.WEBSOCKET_URL);
     ws.onerror = () => showWSMessage('Sorry, there was an error establishing a realtime connection to the app server. \n');
     ws.onopen = () => showWSMessage('Realtime connection to app server established. \n');
     ws.onclose = () => showWSMessage('Realtime connection to app server closed. \n');
@@ -193,7 +201,7 @@ userPageLogic.initUserLogic = function() {
   this.startWSConnection();
   window.fbAsyncInit = function() {
     FB.init({
-      appId            : '2360172457541198',
+      appId            : config.FACEBOOK_APP_ID,
       autoLogAppEvents : true,
       xfbml            : true,
       version          : 'v2.10'

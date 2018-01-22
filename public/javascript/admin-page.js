@@ -1,3 +1,7 @@
+const config = {
+  WEBSOCKET_URL : location.origin.replace(/^http/, 'ws')
+}
+
 const adminPageLogic = {
   page : {
     wsMessages : document.getElementById('messages'),
@@ -42,7 +46,7 @@ adminPageLogic.startWSConnection = function() {
     ws.close();  
     return new Promise.resolve(false);
   } else {
-      ws = new WebSocket('ws://localhost:3000');
+      ws = new WebSocket(config.WEBSOCKET_URL);
       ws.onerror = () => showWSMessage('Sorry, there was an error establishing a realtime connection to the app server. \n');
       ws.onopen = () => showWSMessage('Realtime connection to app server established. \n');
       ws.onclose = (event) => {

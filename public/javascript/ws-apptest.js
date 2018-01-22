@@ -2,6 +2,12 @@ const wsButton = document.getElementById('ws-button');
 const wsMessages = document.getElementById('ws-messages');
 let ws;
 
+const config = {
+  WEBSOCKET_URL : location.origin.replace(/^http/, 'ws'),
+  ORG_URL : 'https://casatravis.org',
+  ORG_HASH : 'casatravis'
+}
+
 function showMessage(message) {
   wsMessages.textContent += message+'\n';
 }
@@ -10,7 +16,7 @@ function startConnection() {
   if (ws) {
     ws.close()
   } else {
-    ws = new WebSocket('ws://localhost:3000');
+    ws = new WebSocket(config.WEBSOCKET_URL);
     ws.onerror = () => showMessage('WebSocket error');
     ws.onopen = () => showMessage('WebSocket connection established');
     ws.onclose = () => showMessage('WebSocket connection closed');

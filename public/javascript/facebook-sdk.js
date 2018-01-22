@@ -1,6 +1,10 @@
+const config = {
+  FACEBOOK_APP_ID : '2360172457541198'
+}
+
 window.fbAsyncInit = function() {
     FB.init({
-      appId            : '2360172457541198',
+      appId            : config.FACEBOOK_APP_ID,
       autoLogAppEvents : true,
       xfbml            : true,
       version          : 'v2.10'
