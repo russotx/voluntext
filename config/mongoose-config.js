@@ -7,6 +7,7 @@
 
 const mongoose = require('mongoose')
 require('dotenv').config()
+/*
 // if environment is dev use dev urls, otherwise use production urls
 const dbURL = (process.env.ENVIRONMENT === 'development') ? 
   {
@@ -17,9 +18,13 @@ const dbURL = (process.env.ENVIRONMENT === 'development') ?
     auth: '',
     volData: '',
   }
+*/
+const dbURL = {} 
+dbURL.auth = process.env.DB_AUTH
+dbURL.volData = process.env.DB_VOLDATA
 
 mongoose.Promise = global.Promise
-  
+   
 let authDBconnection = mongoose.createConnection(dbURL.auth)
 authDBconnection.on('connected',function(){ console.log('mongoose connected: auth dB') })
 authDBconnection.on('error', function(err){ console.log('auth DB connection error: ',err) })

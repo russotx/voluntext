@@ -78,9 +78,10 @@ ___ Subsequent Requests ___
 
 --------------------------------------------------*/
 
+/* Import Passport.js authentication strategy frameworks */
 const localStrategy = require('passport-local').Strategy
 const facebookStrategy = require('passport-facebook').Strategy
-// DB with user accounts for authentication
+/* Database with user accounts for authentication */
 const UserAccount = require('../models/user-account')
 require('dotenv').config()
 
@@ -88,36 +89,43 @@ require('dotenv').config()
   Set the Facebook API redirect uri depending on environment
   URI must be saved as valid uri for the app at developers.facebook.com 
 */
-let FBCBURL = ''
+/*
+let FBCBURL = process.env.FACEBOOK_CALLBACK_URL
+ 
 if (process.env.ENVIRONMENT === 'development') {
   FBCBURL = process.env.FACEBOOK_CALLBACK_URL_DEV  
 } else {
   FBCBURL = process.env.FACEBOOK_CALLBACK_URL_PROD
 }
+*/
 
-// configure passport 
+const FBCBURL = process.env.FACEBOOK_CALLBACK_URL_GO
+
+/*----------------------------------------------------------------------
+
+          Configure Passport 
+
+----------------------------------------------------------------------*/
 module.exports = (passport) => {
 
-  /**  
-      ---- SESSION MANAGEMENT ----
-      
+  /*  
+      ---- SESSION MANAGEMENT ---- 
   */
 
-  // @params: fn | req | done
-  // pushes fn onto passport.serializers stack
-  // determine what data from user object to save in session store to identify
-  // a user (no need to save all of their information in the session store)
+  /* @params: fn | req | done
+     pushes fn onto passport.serializers stack
+     determine what data from user object to save in session store to identify
+     a user (no need to save all of their information in the session store) */
   passport.serializeUser((user, done) => { 
     /* second done() parameter gets saved as a property to 
        req.session.passport.user */
-    //done(null, user.local.email)
     done(null, user.userId)
   })
 
-  /* pushes fn parameter onto passport.deserializers stack
+  /* Pushes fn parameter onto passport.deserializers stack
      deserializers grab the user object out of the session for further use.
 
-     callback defines logic to pull user object from the user DB based on
+     Callback defines logic to pull user object from the user DB based on
      id from the session store. 
      first parameter is from req.session.passport.user which comes from serializeUser */
   passport.deserializeUser((sessionUser, done) => {
@@ -131,14 +139,10 @@ module.exports = (passport) => {
 
   /**
         ---- AUTHENTICATION STRATEGIES ----
-        
         `new strategy` overrides the passport.Strategy.authenticate method      
   */
 
-  /**
-      -- Local Strategy for username/password authentication --
-      
-  */
+  /** -- Local Strategy for username/password authentication --  */
   passport.use('local-login', new localStrategy(
     /* strategy options parameter */
     {
@@ -206,9 +210,7 @@ module.exports = (passport) => {
       access token endpoint https://graph.facebook.com/v2.10/oauth/access_token
         - returns JSON
       passport-facebook implements all of OAuth2.0 flow with Facebook
-      
   */
-  
   passport.use('facebook', new facebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
@@ -227,7 +229,6 @@ module.exports = (passport) => {
     /* Check user account DB for the user's facebook ID, if match
       is found the user can proceed as authenticated, otherwise the user is
       redirected to the failure option set at the route */
-    
     UserAccount.findOne( { 'facebook.id': fbId }, (err, user) => {
       if (err) { 
         console.log('facebook: error with user account DB')  
@@ -239,14 +240,12 @@ module.exports = (passport) => {
         return done(null, false)
       } 
       console.log('facebook: user logged in')
-      /* TODO: save access token in the database
-
-      */
-      // first param is for an error, 2nd param says who was authenticated
+      /* TODO: save access token in the database */
+      /* first param is for an error, 2nd param says who was authenticated */
       return done(null, user)
     })
   }
 ))
 
 
-} // end of module.exports
+} /* end of module.exports */

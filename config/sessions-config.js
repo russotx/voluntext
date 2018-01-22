@@ -30,5 +30,5 @@ const sessOpts = {
 
 const sessionParser = session(sessOpts)
 
-// export session parser to share with Express app and Websocket server
+/* export session parser to share with Express app and Websocket server */
 module.exports = sessionParser

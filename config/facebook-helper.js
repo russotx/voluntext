@@ -50,7 +50,7 @@ exports.makeFBloginHelper = function(){
           if(body.data.user_id) {
             return resolve(body.data)
           }
-          // if for some reason no user id was included in the data
+          /* if for some reason no user id was included in the data */
           return reject(body.data)
         })
       })
@@ -81,6 +81,6 @@ exports.makeFBloginHelper = function(){
         })
       })
     } 
-  }// -- end FBloginFlow object
+  }/* -- end FBloginFlow object */
   return FBloginFlow
 }()

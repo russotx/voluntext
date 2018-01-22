@@ -6,7 +6,7 @@ mongoose.Promise = global.Promise
 /* import mongoose connection to volunteer data database */
 const dataDBconnection = require('../config/mongoose-config').dataDBconn
 const Schema = mongoose.Schema
-let adminUser = "admin"
+//let adminUser = "admin"
 
 /*****************************************************************************
                     -- Annual Logs Schema --

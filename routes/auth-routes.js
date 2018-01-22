@@ -86,10 +86,12 @@ module.exports = (router, passport, root) => {
     const userId = req.user.userId
     const appId = process.env.FACEBOOK_APP_ID
     const appSecret = process.env.FACEBOOK_APP_SECRET
-    let redirectURI = ''
+    const redirectURI = process.env.FACEBOOK_CALLBACK_URL_OB
+    /*
     process.env.ENVIRONMENT === 'development' ? 
       redirectURI = process.env.FACEBOOK_CALLBACK_URL_DEV_OB :
       redirectURI = process.env.FACEBOOK_CALLBACK_URL_PROD_OB
+    */  
     let code = req.query.code
     FB.getUserData(appId, redirectURI, appSecret, code)
     .then((FBuserData) => {
