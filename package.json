@@ -4,9 +4,11 @@
   "description": "app for tracking volunteer hours with help of sms",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon --exec babel-node server.js",
-    "prestart": "babel --out-dir prod-build",
-    "start": "node prod-build/server.js",
+    "dev": "nodemon --exec babel-node src/server.js",
+    "prestart": "babel src --out-dir build",
+    "start": "node build/server.js",
+    "postinstall": "npm run clean-build && babel src --out-dir build",
+    "clean-build": "rm -r build && mkdir build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

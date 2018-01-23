@@ -9,7 +9,7 @@ yarn-error.log*
 oldserver.js
 vtext.json
 .tern-project
-prod-build/
+build/
 .env
 oldviews/
 vtext-session.yaml
