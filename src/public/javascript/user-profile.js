@@ -3,9 +3,9 @@ const config = {
   ORG_HASH : 'casatravis',
   FACEBOOK_APP_ID : '2360172457541198',
   APP_DOMAIN : 'https://voluntext.herokuapp.com',
-  FACEBOOK_CALLBACK_URL_OB : `${config.APP_DOMAIN}/api/auth/facebook/proceed`,
   WEBSOCKET_URL : location.origin.replace(/^http/, 'ws')
 }
+config.FACEBOOK_CALLBACK_URL_OB = `${config.APP_DOMAIN}/api/auth/facebook/proceed`
 
 const userPageLogic = {
   userData : {},
