@@ -4,7 +4,7 @@ let ws;
 
 const config = {
   WEBSOCKET_URL : location.origin.replace(/^http/, 'ws'),
-  ORG_URL : 'https://casatravis.org',
+  ORG_URL : 'http://casatravis.org',
   ORG_HASH : 'casatravis'
 }
 

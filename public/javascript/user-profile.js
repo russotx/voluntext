@@ -1,5 +1,5 @@
 const config = {
-  ORG_URL : 'https://casatravis.org',
+  ORG_URL : 'http://casatravis.org',
   ORG_HASH : 'casatravis',
   FACEBOOK_APP_ID : '2360172457541198',
   APP_DOMAIN : 'https://voluntext.herokuapp.com',
