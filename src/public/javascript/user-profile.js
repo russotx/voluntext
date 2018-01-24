@@ -62,6 +62,8 @@ userPageLogic.updateFBhrsQuote = function(reportPeriod = 'month') {
   Initiate The Websocket Connection
     Start a WS connection and define behavior for WS events: 
       open, close, messages, and errors
+    Once server recognizes a valid websocket connection it will search for the user's
+    data to send over the socket so it can be displayed.
     Internal functions:
       - processData()
       - showWSMessage()
@@ -150,10 +152,10 @@ userPageLogic.updateDOM = function(elements) {
     this.page.smsYes.classList.toggle('hide');
     this.page.smsRadio.disabled = false;
   }
-  if (elements.totalHours) {
+  if ((elements.totalHours) || (elements.totalHours === 0)) {
     this.page.totalHours.textContent = elements.totalHours;
   }
-  if (elements.thisMonthHours) {
+  if ((elements.thisMonthHours) || (elements.thisMonthHours === 0)) {
     this.page.latestHrs.textContent = elements.thisMonthHours;
   }
   if (elements.email) {
