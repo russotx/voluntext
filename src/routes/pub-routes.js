@@ -2,6 +2,7 @@ const path = require('path')
 const moment = require('moment')
 const VolData = require('../models/voldata-db').volData
 const AnnualLogs = require('../models/voldata-db').annualLogs
+const wsServer = require('../wsServer')
 /*const Bandwidth = require('node-bandwidth')
 const client = new Bandwidth({
   userId : process.env.BANDWIDTH_USERID,
@@ -69,6 +70,9 @@ module.exports = (router, root) => {
       VolData.getUserByPhone(fromPhone)
       .then((userId) => {
         VolData.logHours(userId, dataToLog)  
+        .then(() => {
+          wsServer.emit('new-hours')
+        })
       }) 
       .catch((error) => {
         /* error accessing the database */
