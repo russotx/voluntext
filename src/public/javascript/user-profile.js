@@ -183,7 +183,12 @@ userPageLogic.reportHours = function(event) {
   userData.year = parseInt(yearInput.value, 10);
   axios.post('/user/api/hours-update', userData)
   .then((response) => {
-    if (response) console.log('res to axios post: ', response);
+    if (response) { 
+      console.log('res to axios post: ', response);
+    } else {
+      console.log('hour-update done. no response to request');
+    }
+    
   })
   .catch((err) => {
     _this.userData.err = err;

@@ -139,12 +139,14 @@ module.exports = (router, passport, root) => {
       if (wsServer.userSockets[userId]) {
         wsServer.userSockets[userId].sendValidData(dataForClient) 
       } else {
-      /* send a json response in case there's no websocket connection */
+      /* send a json response for axios to handle in case there's no 
+         websocket connection */
         console.log('no user websocket connection')
         res.json({ saved : true, updatedData : dataForClient }) 
       } 
       /* emit new hours event to trigger update to admin dashboard */
       wsServer.emit('new-hours') 
+      return res.end()
     })
     /* handle error trying to update hours in the log */
     .catch((err) => {
