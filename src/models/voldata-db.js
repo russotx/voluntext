@@ -44,7 +44,8 @@ let annualLogsSchema = new Schema({
 /*------------------------------------------------------------------------------
             -- Methods for Annual Log Schema --
 ------------------------------------------------------------------------------*/
-/* initialize a new log entry for a user in the Annual Hours Logs collection */
+/* initialize a new log entry for a user in the Annual Hours Logs collection 
+  TO-DO: need to log creation of logs to a file in case of problems with the DB */
 annualLogsSchema.methods.initLog = function(email, userInput){
   /* set defaults for hours, year, month */
   let hours = 0
@@ -109,7 +110,10 @@ let annualLogsModel = dataDBconnection.model('AnnualHoursLogs',
 annualLogsModel.fetchUserLogByYear = function(email, year) {
   return new Promise((res, rej) => {
     annualLogsModel.findOne({'user': email, 'year': year}, (err, data) => {
-      if (err) return rej(err)    
+      if (err) {
+        return rej(err)    
+      }
+      // TO-DO: if no data is returned trigger initialization of a log for the year? 
       return res(data)
     })
   })
@@ -118,18 +122,24 @@ annualLogsModel.fetchUserLogByYear = function(email, year) {
 annualLogsModel.getAdminDashboardData = function() {
   let thisYear = moment().year()
   let thisMonth = moment().format("MMMM")
+  /* set a space delimited list of document fields to return */
   let returnProps = `annualTotal ${thisMonth}` 
   return new Promise((res, rej) => {
-    let sumHours = { totalAllHours : 0, totalThisMonthHours : 0 }
+    let sumHours = { totalAllHours : 0, totalThisMonthHours : 0, logFound : false }
     annualLogsModel.find({ 'year' : thisYear }, returnProps).cursor()
       .on('data', function(doc){
+        sumHours.logFound = true
         sumHours.totalAllHours += doc.annualTotal   
         sumHours.totalThisMonthHours += doc[thisMonth].hours
       })
       .on('end', function(){
+        if (sumHours.logFound == false) {
+          console.log("getAdminDashboardData: no log for user found")
+        }
         res(sumHours)           
       })
       .on('error', function(error){
+        console.log("getADminDashboardData: error with query--- \n", error)
         rej(error)
       })
   }) 
@@ -264,9 +274,15 @@ volDataModel.getUserData = function(userId) {
         Object.assign(collectedData, userData._doc)
         annualLogsModel.fetchUserLogByYear(userData.email, thisYear)
         .then((thisYearLog) => {
-          collectedData.totalHours = thisYearLog.annualTotal || 0
-          collectedData.thisMonthHours = thisYearLog[thisMonth].hours || 0  
-          return res(collectedData)
+          if (thisYearLog) {
+            collectedData.totalHours = thisYearLog.annualTotal || 0
+            collectedData.thisMonthHours = thisYearLog[thisMonth].hours || 0  
+            return res(collectedData)
+          } else {
+            collectedData.totalHours = 0
+            collectedData.thisMonthHours = 0
+            return res(collectedData)
+          }
         })
         .catch((error) => {
           return rej(error)
@@ -316,13 +332,17 @@ volDataModel.getAllSMSnumbers = function() {
 *  @param {String} userId - for the volunteer (an email address)
 *  @param {Object} dataForLog - the month/year/hours for the log
 *    - updates the hours in a log or creates a new log if needed 
+
+*   TO-DO: break this function down into smaller functions
+*           - create a hasLog checker for annualLogsModel
 */
 volDataModel.logHours = function(userId, dataForLog) {
   let month = dataForLog.month
   let year = parseInt(dataForLog.year, 10)
   let hours = parseInt(dataForLog.hours, 10)
   return new Promise((res, rej) => {
-    /* ensure a document for the volunteer exists in Vol Data collection */
+    /* ensure a document for the volunteer exists in Vol Data collection 
+       essentially ensuring they exist */
     volDataModel.findOne( { 'userId' : userId }, (err, user) => {
       if (err) {
         console.log('error finding user data.')
@@ -330,6 +350,7 @@ volDataModel.logHours = function(userId, dataForLog) {
       } else if (!user) {
         rej('invalid user')
       } else {
+          /* user record found, proceed to logging hours */
           let userEmail = user.email
           console.log('user email: ', userEmail)
           /* check Annual Logs collection for existing user log entry document 
@@ -346,12 +367,13 @@ volDataModel.logHours = function(userId, dataForLog) {
               .catch((err) => {
                 rej(err)
               })
-            } else {
-              /* no entry exists, need to initialize a new log document in the 
+            } /* --end adding hours to existing annual log */ 
+            else {
+              /* no entry for the year exists, need to initialize a new log document in the 
                 Annual Logs collection */
               console.log(`user log for ${year} DOES NOT EXIST, initializing new log...`)
               userLog = new annualLogsModel()
-              /* .init resolves with the id for the new log document */
+              /* .initLog resolves with the id for the new log document */
               userLog.initLog(userEmail, dataForLog)
               .then((docId) => {
                 /* add the _id for the new log to the user's array of log ids in 
@@ -369,12 +391,12 @@ volDataModel.logHours = function(userId, dataForLog) {
                 console.log('successful update of the user log in logHours: \n', userLog)
                 res(userLog)    
               })
-            }
-          })
-        }
-    })
-  })
-}
+            } /* --end creating new log, adding hours to it, and pushing log to user array of annual logs */
+          }) /* --end looking for existing log and handling as appropriate */
+        } /* --end user record found */
+      }) /* --end ensure user record exists in system */
+  }) /* --end promise */
+} /* --end logHours() */
 
 volDataModel.setSMSopt = function(userId, option) {
   return new Promise((res,rej) => {

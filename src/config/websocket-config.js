@@ -38,6 +38,8 @@ module.exports = (wsServer) => {
         socket.sendValidData(data) 
       })
     } else {
+      /* call getter to retrieve the user's relevent data from the database 
+         to display on their dashboard page */
       VolData.getUserData(userId)
       .then((userData) => {
         socket.sendValidData(userData) 

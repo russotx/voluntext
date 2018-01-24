@@ -133,11 +133,15 @@ userPageLogic.resultNotify = function(result) {
  *  
  */  
 userPageLogic.updateDOM = function(elements) {
+  if (elements == undefined) {
+    console.log("Something went wrong: nothing was passed to update the DOM.");
+    return false;
+  }
   if (elements.result) {
     if (elements.result === "success") {
-      this.resultNotify("success")
+      this.resultNotify("success");
     } else {
-      this.resultNotify("fail")
+      this.resultNotify("fail");
     }
   }
   if (elements.smsOpt) {
@@ -155,6 +159,7 @@ userPageLogic.updateDOM = function(elements) {
   if (elements.email) {
     this.page.username.textContent = elements.email;
   }
+
 } // -- end updateDOM
   
 userPageLogic.connectFacebook = function() {
@@ -196,9 +201,15 @@ userPageLogic.getUserData = function() {
   });
 } // -- end getUserData()
   
+/* Get the ball rolling on the user profile page 
+      - start the websocket connection
+      - initialize and envoke the Facebook SDK code 
+      - add event listeners 
+ */
 userPageLogic.initUserLogic = function() { 
   let _this = this;
   this.startWSConnection();
+  /* boilerplate FB code with some event listeners thrown in */
   window.fbAsyncInit = function() {
     FB.init({
       appId            : config.FACEBOOK_APP_ID,
@@ -260,7 +271,8 @@ userPageLogic.setSMSOpt = function(event) {
   } 
   return true;    
 } // -- end setSMSOpt()
-  
+
+/* -- mostly boilerplate FB code -- */  
 userPageLogic.shareDialog = function() {
   let _this = userPageLogic; 
   FB.ui({
