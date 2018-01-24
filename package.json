@@ -25,11 +25,11 @@
   },
   "homepage": "https://github.com/russotx/voluntext#readme",
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-preset-env": "^1.6.0",
     "nodemon": "^1.11.0"
   },
   "dependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-preset-env": "^1.6.0",
     "bcrypt": "^1.0.2",
     "body-parser": "^1.17.2",
     "connect-flash": "^0.1.1",
