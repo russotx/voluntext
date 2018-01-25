@@ -26,6 +26,18 @@ WebSocket.prototype.sendValidData = function(data) {
       return this.send(dataString) 
   }
 }
+/**
+ * a function to ping the other side at an interval
+ * @param {Number} interval - interval to ping the other side
+ * 
+ */
+WebSocket.prototype.keepConnAlive = function(interval = 10000) {
+  setInterval(()=> {
+    this.ping()
+    console.log('pinging the connection')
+  }, interval)
+  return true
+}
 
 /* options to pass to the 'ws' API for the WebSocket Server */
 let wsOpts = {

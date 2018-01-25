@@ -27,7 +27,9 @@ module.exports = (wsServer) => {
     socket.userId = userId
     /* add reference to the socket on the Server with userId as key */
     wsServer.userSockets[userId] = socket
-    
+    socket.isAlive = true
+    let keepAliveInterval = 29000
+    socket.keepConnAlive(keepAliveInterval) 
     console.log(`ws user: \n ${userId}`)
     console.log('SOCKET CONNECTION CREATED.')
     
