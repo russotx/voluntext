@@ -100,13 +100,13 @@ module.exports = (options) => {
         err.stepMessage = 'error with DB trying to check dupe email on signup'
         if (failureFlash) req.flash('onboardMessage',err.stepMessage)
         res.redirect(failureRedirect)
-        next()
+        return next()
       }
       if (user) {
         console.log('email already exists')
         if (failureFlash) req.flash('onboardMessage','user already exists with this email: '+userProps.email)
         res.redirect(failureRedirect)
-        next()
+        return next()
       } 
       // the user doesn't exist yet, proceeding to create new user
       console.log('attempting to create and save new user') 
@@ -118,21 +118,21 @@ module.exports = (options) => {
         .then((doc) => {
           console.log('successfully created new user: \n', doc)
           res.redirect(successRedirect)
-          next()
+          return next()
         })
         .catch((err) => {
           console.log('error creating new user: ', err.stepMessage, '\n', err)
           /* handleNewUserErrors().then().catch() */
           if (failureFlash) req.flash('onboardMessage',err.stepMessage)
           res.redirect(failureRedirect)
-          next()
+          return next()
         }) // -- end createNewUser .catch
       }) // -- end validateOnboard .then
       .catch((err) => {
         console.log('error with user data \n', err)
         if (failureFlash) req.flash('onboardMessage', 'error with user data')
         res.redirect(failureRedirect)
-        next()
+        return next()
       })
     }) // -- end .findOne() looking for dupe acct 
   } // end returned middleware function

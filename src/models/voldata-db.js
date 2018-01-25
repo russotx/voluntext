@@ -22,21 +22,26 @@ let logEntrySchema = new Schema({
   timeStamp: { type: String, default: newTimeStamp() }
 })
 
+let logEntryDefault = {
+  hours: 0,
+  timeStamp: newTimeStamp()
+}
+
 /* collection representing annual logs */
 let annualLogsSchema = new Schema({
   year: { type: Number, index: true, default: moment().year() }, /* index this field */
-  January: { type: logEntrySchema },
-  February: { type: logEntrySchema },
-  March: { type: logEntrySchema },
-  April: { type: logEntrySchema },
-  May: { type: logEntrySchema },
-  June: { type: logEntrySchema },
-  July: { type: logEntrySchema },
-  August: { type: logEntrySchema },
-  September: { type: logEntrySchema },
-  October: { type: logEntrySchema },
-  November: { type: logEntrySchema },
-  December: { type: logEntrySchema },
+  January: { type: logEntrySchema, default: logEntryDefault },
+  February: { type: logEntrySchema, default: logEntryDefault },
+  March: { type: logEntrySchema, default: logEntryDefault },
+  April: { type: logEntrySchema, default: logEntryDefault },
+  May: { type: logEntrySchema, default: logEntryDefault },
+  June: { type: logEntrySchema, default: logEntryDefault },
+  July: { type: logEntrySchema, default: logEntryDefault },
+  August: { type: logEntrySchema, default: logEntryDefault },
+  September: { type: logEntrySchema, default: logEntryDefault },
+  October: { type: logEntrySchema, default: logEntryDefault },
+  November: { type: logEntrySchema, default: logEntryDefault },
+  December: { type: logEntrySchema, default: logEntryDefault },
   user: { type: String, index: true }, /* index this field */
   annualTotal: { type: Number, default: 0 }  
 })
@@ -315,7 +320,12 @@ volDataModel.getAllSMSnumbers = function() {
   return new Promise((res, rej) => {
     volDataModel.find({ 'smsOpt' : true }, 'phone').cursor()
     .on('data', function(doc) {
-      allNumbers.push(`+1${doc.phone}`)
+      /* check to see if the number is clearly a fake */
+      if (doc.phone.substring(0,3) == "555") {
+        console.log('fake number')
+      } else {
+        allNumbers.push(`+1${doc.phone}`)
+      }
     })  
     .on('error', function(error) {
       rej(error)
@@ -353,11 +363,11 @@ volDataModel.logHours = function(userId, dataForLog) {
           /* user record found, proceed to logging hours */
           let userEmail = user.email
           console.log('user email: ', userEmail)
-          /* check Annual Logs collection for existing user log entry document 
+          /* CHECK ANNUAL LOGS COLLECTION FOR EXISTING user log entry document 
             for the year being logged. Update existing or create new log as needed */
           annualLogsModel.findOne( { 'user': userEmail, 'year': year }, (err, userLog) => {
             if (userLog) {
-              /* an entry exists, update the month field in the existing entry */
+              /* an ENTRY EXISTS, update the month field in the existing entry */
               console.log(`A user log for ${year} exists.`)
               /* updateMonthHours performs a save of the model after changing data and returns a promise */
               userLog.updateMonthHours(month, hours)
@@ -369,7 +379,7 @@ volDataModel.logHours = function(userId, dataForLog) {
               })
             } /* --end adding hours to existing annual log */ 
             else {
-              /* no entry for the year exists, need to initialize a new log document in the 
+              /* NO ENTRY FOR THE YEAR EXISTS, need to initialize a new log document in the 
                 Annual Logs collection */
               console.log(`user log for ${year} DOES NOT EXIST, initializing new log...`)
               userLog = new annualLogsModel()
