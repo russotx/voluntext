@@ -31,8 +31,9 @@ module.exports = (router, root) => {
     res.sendFile(path.join(root,'public','views','login2.html'))
   })
 
-  router.get('/favicon.ico', (req, res) => {
+  router.get('/favicon.ico', (req, res, next) => {
     res.status(204)
+    next()
   })
   
   /* route for receiving sms messages from Bandwidth API 
@@ -53,6 +54,9 @@ module.exports = (router, root) => {
           deliveryDescription {String} - msg associated with the code
   */
   router.post('/report-hours', (req, res) => {
+    if (!req.body) {
+      return res.end()
+    }
     let inputHours = req.body.text
     console.log('sms from: ', req.body.from)
     console.log('user input from sms: ', inputHours)
