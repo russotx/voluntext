@@ -54,7 +54,7 @@ module.exports = (router, root) => {
           deliveryDescription {String} - msg associated with the code
   */
   router.post('/report-hours', (req, res) => {
-    if (!req.body) {
+    if ((!req.body) || (!req.body.from)) {
       return res.end()
     }
     let inputHours = req.body.text

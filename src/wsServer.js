@@ -26,18 +26,6 @@ WebSocket.prototype.sendValidData = function(data) {
       return this.send(dataString) 
   }
 }
-/**
- * a function to ping the other side at an interval
- * @param {Number} interval - interval to ping the other side
- * 
- */
-WebSocket.prototype.keepConnAlive = function(interval = 10000) {
-  setInterval(()=> {
-    this.ping()
-    console.log('pinging the connection')
-  }, interval)
-  return true
-}
 
 /* options to pass to the 'ws' API for the WebSocket Server */
 let wsOpts = {
@@ -85,13 +73,27 @@ let wsOpts = {
   },
   /* the server to handle the handshake, using the Node http server */
   server: httpServer,
-  /* whether to track connected clients */
+  /* whether to track connected clients, needed for pinging to keep alive */
   clientTracking: true 
 }
 
 /* creates a websocket server instance with the above defined options */
 let wsServer = new WebSocket.Server(wsOpts)
 
+/* create a keep alive function to ping the client */
+wsServer.keepAlive = function(interval) {
+  setInterval(() => {
+    wsServer.clients.forEach((sock) => {
+      if (sock.isAlive === false) {
+        console.log('no pong received since last ping to client')
+        return sock.terminate()
+      }
+      sock.isAlive = false
+      console.log('pinging the client')
+      sock.ping()
+    })
+  }, interval)  
+}
 /* exporting the websocket server */
 module.exports = wsServer
   

@@ -9,12 +9,15 @@ require('dotenv').config()
 const adminId = process.env.ADMINID
 const AnnualLogs = require('../models/voldata-db').annualLogs
 const VolData = require('../models/voldata-db').volData
+const pingInterval = 20000 /* in ms */
 
 module.exports = (wsServer) => {
   
   /* property to contain socket instances in an object (accessing object properties is fast) */
   wsServer.userSockets = {}
-  
+  /* keep the connection alive by pinging the client if its still connected, function is 
+     defined in wsServer.js */
+  wsServer.keepAlive(pingInterval)
   /**
    * Callback:
    * @param {Object} socket - the WebSocket instance
@@ -28,8 +31,12 @@ module.exports = (wsServer) => {
     /* add reference to the socket on the Server with userId as key */
     wsServer.userSockets[userId] = socket
     socket.isAlive = true
-    let keepAliveInterval = 29000
-    socket.keepConnAlive(keepAliveInterval) 
+    console.log('socket.isAlive = ', socket.isAlive)
+    socket.on('pong', () => {
+      console.log('client sent a pong')
+      socket.isAlive = true
+    })
+
     console.log(`ws user: \n ${userId}`)
     console.log('SOCKET CONNECTION CREATED.')
     
@@ -56,11 +63,12 @@ module.exports = (wsServer) => {
     /* socket instance closed */
     socket.on('close', (code, reason) => {
       /* remove the socket id (by userID) from the object of active sockets */
+      socket.isAlive = false
       delete wsServer.userSockets[userId]
       console.log(`Socket closed: ${code} for: ${reason}`)
     })
     
-  }) /* -- end of 'connection' event */
+  }) /* -- end of 'connection' event with socket instance */
   
   /* Custom 'new-hours' event triggered when a user updates their hours, calls 
      function to update the admin dashboard data if admin is logged in */
@@ -73,6 +81,8 @@ module.exports = (wsServer) => {
     }
   })
   
+    
+
   /* WebSocket Server error */
   wsServer.on('error',(err) => {
     console.log('error with websocket server: ', err)
