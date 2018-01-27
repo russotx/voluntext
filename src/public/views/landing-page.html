@@ -2,40 +2,63 @@
 <html lang="en-us">
 <head>
   <meta charset="UTF-8">
-  <title>Welcome To VolunText</title>
+  <title>VolunText</title>
   <!-- reset browser defaults -->
   <link rel="stylesheet" type="text/css" href="/reset.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <!-- custom stylesheet -->
-  <link rel="stylesheet" type="text/css" href="/landing.css">
+  <link rel="stylesheet" type="text/css" href="/vtext-style.css">
 </head>
 <body>
 
-  <header>
-
-    <h1>Welcome to VolunText</h1>
-    <nav>
-    </nav>
-    
+  <header class="jumbotron">
+    <div class="row">
+      <div class="col-md-6">
+        <h1 class="underline">VolunText</h1>
+      </div>
+      <div class="col-md-12">
+        <h3><small>Document volunteer hours via SMS!</small></h3>
+      </div>
+    </div>
+      <!-- <div class="row">
+        <div class="col-md-12 lead">
+          <p>Document volunteer hours via SMS!</p>
+        </div>
+      </div> -->
   </header>
 
   <!-- the main body: begin content -->
-  <main>
-
-    <!-- Primary content -->
-    <section class="content-area">
-      <h2>Current Users</h2>
-      <a href="/login"><h4>login</h4></a>
-      <h4>System Messages:</h4>
-      <pre id="ws-messages"style="overflow: scroll; height: 400px; width: 75%;"></pre>
-    </section>
-
+  <main class="container-fluid">
+    <div class="row">
+      <section class="text-left col-md-3 order-lg-last order-md-last order-sm-first">
+        <h2>Current Users</h2>
+        <a class="btn btn-primary" href="/login"><h4>login</h4></a>
+      </section>
+      <section class="lead col-md-9 text-justify">
+        <p>
+          <strong>Volunteer based</strong> non-profits contribute hours of work to their cause. Documenting these hours can be challenging and burdens an already hefty workload for both staff and volunteers.
+        </p>  
+        <p>
+          With <strong>VolunText</strong>, organizations can prompt their database of volunteers via SMS to reply to the message with the number of hours they contributed that month.
+        </p>
+        <p class="text-center">
+          For volunteers, reporting couldn't be simpler: <strong>type a number</strong>, <strong>send</strong>, <strong>done.</strong>
+        </p>
+        <p>
+          Using MongoDB, responses are stored by month in an annual log for each volunteer along with a calculation of their total contribution for the year.
+          The organziation can view live updates of total volunteered hours on the administrator dashboard page. 
+          Volunteers can log in to their dashboard to submit hours, opt in or out of SMS messages, and connect to their Facebook page. 
+          Once a volunteer has connected VolunText to Facebook, they can build awareness for the organization by sharing their progress to their Facebook feed.
+        </p>
+      </section>
       <!-- no more content past this piont -->
   </main>
 
 <!-- footer  -->
-<footer>
-  <p>&copy;Copyright 2017 Daniel Russo</p>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">&copy;Copyright 2017 Daniel Russo</p>
+  </div>
 </footer>
 
 </body>

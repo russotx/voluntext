@@ -3,13 +3,13 @@ p {
   margin-bottom: 0;
 }
 
-header {
-  font-weight: bold;
-  .username {
-    flex-direction: row;
-    justify-content: flex-end;
-  }
-}
+// header {
+//   font-weight: bold;
+//   .username {
+//     flex-direction: row;
+//     justify-content: flex-end;
+//   }
+// }
 
 main {
   padding-top: 20px;
@@ -41,11 +41,11 @@ summary {
   max-height: 30px;
 }
 
-#page-header {
-  padding-top: 10px;
-  background-color: #38AFFF;
-  color: white;
-}
+// #page-header {
+//   padding-top: 10px;
+//   background-color: #38AFFF;
+//   color: white;
+// }
 
 #user-actions {
   flex-direction: row;

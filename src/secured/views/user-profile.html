@@ -2,31 +2,34 @@
 <html lang="en-us">
 <head>
   <meta charset="UTF-8">
-  <title>VolunText User Profile</title>
+  <title>VolunText|User</title>
   <!-- reset browser defaults -->
   <link rel="stylesheet" type="text/css" href="/reset.css"> 
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <!-- custom stylesheet -->
   <link rel="stylesheet" type="text/css" href="/user-page.css">
+  <link rel="stylesheet" type="text/css" href="/vtext-style.css">
   <meta property="fb:app_id" content="2360172457541198">
   <meta property="og:type" content="article">
 </head>
 
-<body class="container-fluid">
+<body>
   
-  <header id="page-header" class="row">
-    <div class="col-md-4 offset-md-4">
-      <h4 id="vtext-logo-txt" class="text-center">VolunText</h4>
+  <header id="page-header" class="jumbotron">
+    <div class="row">
+      <div class="col-md-6">
+        <h1 class="underline">VolunText<small id="username"></small></h1>
+      </div>
     </div>
-    <div class="d-flex col-md-4 username">
-      <p>user: <span id="username"></span></p>
+    <summary class="row">
+      <div class="col-md-12">
+        <h5>Total hours volunteered this year: <span class="standout" id="total-hours"></span></h5>
+      </div>
+    </summary>
+    <div class="logout">
+      <a href="/logout" class="btn btn-primary">Logout</a>
     </div>
   </header>
-  <summary class="row">
-    <div class="col-md-12">
-      <h5>Total Hours Volunteered This Year: <span id='total-hours'></span></h5>
-    </div>
-  </summary>
 
   <!-- the main body: begin content -->
   <main class="container-fluid">
@@ -38,7 +41,7 @@
         <figure class="card">
           <div class="card-block">
             <!-- quote dialog api -->
-            <p id="new-vol-hours" class="fb-quotable ">This month you volunteered <span id='latest-hrs'></span> hours!</p>
+            <p id="new-vol-hours" class="fb-quotable">This month you volunteered <span id='latest-hrs'></span> hours!</p>
           </div>
         </figure>
         <!-- share dialog api -->
@@ -130,20 +133,20 @@
       </section>
     </aside>
     
-    <section class="row">
+    <!-- <section class="row">
       <div class="col-md-12">
         <h5>System Messages</h5>
         <pre id="ws-messages"style="overflow: scroll; height: 100px; width: 75%;"></pre>
       </div>
     </section>
-
+ -->
       <!-- no more content past this piont -->
   </main>
 
 <!-- footer  -->
-<footer class="row">
-  <div class="col-md-12">
-    <p>&copy;Copyright 2017 Daniel Russo</p>
+<footer class="footer">
+  <div class="container">
+    <p class="text-center">&copy;Copyright 2017 Daniel Russo</p>
   </div>
 </footer>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>

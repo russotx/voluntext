@@ -112,10 +112,11 @@ userPageLogic.startWSConnection = function() {
     
     return Promise.resolve(true);
   }
-  /* display websocket messages in the system messages section of the webpage */ 
+  /* report websocket messages */ 
   function showWSMessage(message) {
-    let wsMessages = _this.page.wsMessages;
-    wsMessages.textContent += message+'\n';
+   // let wsMessages = _this.page.wsMessages;
+   // wsMessages.textContent += message+'\n';
+   console.log(message);
   }
 } // -- end startWSConnection()
 
@@ -159,7 +160,7 @@ userPageLogic.updateDOM = function(elements) {
     this.page.latestHrs.textContent = elements.thisMonthHours;
   }
   if (elements.email) {
-    this.page.username.textContent = elements.email;
+    this.page.username.textContent = ` | ${elements.email}`;
   }
 
 } // -- end updateDOM

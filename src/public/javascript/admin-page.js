@@ -4,7 +4,7 @@ const config = {
 
 const adminPageLogic = {
   page : {
-    wsMessages : document.getElementById('messages'),
+    //wsMessages : document.getElementById('messages'),
     monthHours : document.getElementById('month-hours'),
     yearHours : document.getElementById('year-hours'),
     message : document.getElementById('message'),
@@ -84,10 +84,11 @@ adminPageLogic.startWSConnection = function() {
       }
       return Promise.resolve(true);
     }
-  /* display websocket messages in the system messages section of the webpage */ 
+  /* report websocket messages */ 
   function showWSMessage(message) {
-    let wsMessages = _this.page.wsMessages;
-    wsMessages.textContent += message+'\n';
+    //let wsMessages = _this.page.wsMessages;
+    //wsMessages.textContent += message+'\n';
+    console.log(message);
   }
 } // -- end startWSConnection()
 

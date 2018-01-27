@@ -2,63 +2,70 @@
 <html lang="en-us">
 <head>
   <meta charset="UTF-8">
-  <title>VolunText Admin</title>
+  <title>VolunText|Admin</title>
   <!-- reset browser defaults -->
   <link rel="stylesheet" type="text/css" href="/reset.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <!-- custom stylesheet -->
-  <link rel="stylesheet" type="text/css" href="/admin-page.css">
+  <link rel="stylesheet" type="text/css" href="/vtext-style.css">
 </head>
-<body class="container-fluid">
+<body>
 
-  <header class="row">
-    <h1>Welcome to the Admin Page</h1>
-    <nav class="col-md-12">
-    <a href='/admin/onboard'><h4>Onboard New Users</h4></a>
-    </nav>
+  <header class="jumbotron">
+    <div class="row">
+      <div class="col-md-6">
+        <h1 class="underline">VolunText <small>| Admin Dashboard</small></h1>
+      </div>
+    </div>
+    <summary class="row">
+      <div class="col-md-12">
+        <h5>Total hours reported this month: <span class="standout" id="month-hours"></span></h5>
+        <h5>Total hours reported this year: <span class="standout" id="year-hours"></span></h5>
+      </div>
+    </summary>  
+    <div class="logout">
+      <a href="/logout" class="btn btn-primary">Logout</a>
+    </div>
   </header>
 
   <!-- the main body: begin content -->
-  <main class="row">
+  <main class="container-fluid">
 
     <!-- Primary content -->
-    <section class="col-md-12">
-      <h4>Total Hours Reported This Month: <span id="month-hours"></span></h4>
-      <h4>Total Hours Reported This Year: <span id="year-hours"></span></h4>
+    <section class="row">
+      <div class="col-md-6 order-lg-last order-md-last order-sm-first text-center">
+        <a class="btn btn-primary" href='/admin/onboard'>Onboard New Users</a>
+      </div>
+      <div class="col-md-6">
+        <form class="square-form" action="/admin/api/send-all-sms" method="post">
+          <h3>Send SMS Message to Volunteers:</h3>
+          <div class="form-group">
+            <label for="message">SMS Message:</label>
+            <input id="message" class="form-control" name="message" type="text" value="Please respond with your hours for this month!">
+          </div> 
+          <div class="form-group">
+            <label for="sms-tag">Message Tag (optional):</label>
+            <input id="sms-tag" name="tag" type="text"> 
+          </div> 
+          <div class="form-group">
+            <!-- <div class="offset-sm-2 col-sm-10"> -->
+              <!-- <input id="send-sms" class="btn" type="submit" value="Send SMS">  -->
+              <button id="send-sms" class="btn btn-success" type="submit">Send SMS</button>
+            <!-- </div> -->
+          </div> 
+        </form> 
+      </div>
     </section>
-    <section class="col-md-6">
-      <h3>Send SMS Message to Volunteers:</h3>
-      <form class="square-form" action="/admin/api/send-all-sms" method="post">
-        <div class="form-group">
-          <label for="message">SMS Message:</label>
-          <input id="message" class="form-control" name="message" type="text" value="Please respond with your hours for this month!">
-        </div> 
-        <div class="form-group">
-          <label for="sms-tag">Message Tag (optional):</label>
-          <input id="sms-tag" name="tag" type="text"> 
-        </div> 
-        <div class="form-group">
-          <!-- <div class="offset-sm-2 col-sm-10"> -->
-            <!-- <input id="send-sms" class="btn" type="submit" value="Send SMS">  -->
-            <button id="send-sms" class="btn btn-primary" type="submit">Send SMS</button>
-          <!-- </div> -->
-        </div> 
-      </form> 
-    </section>
-    <section class="col-md-12">
-      <p id="messages"></p>
-    </section>
-
   <!-- no more content past this piont -->
   </main>
 
-<!-- footer  -->
-<footer class="row">
-  <div class="col-md-12">
-    <p>&copy;Copyright 2017 Daniel Russo</p>
-  </div>
-</footer>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script src='/admin-page.js'></script> 
+  <!-- footer  -->
+  <footer class="footer">
+    <div class="container">
+      <p class="text-center">&copy;Copyright 2017 Daniel Russo</p>
+    </div>
+  </footer>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src='/admin-page.js'></script> 
 </body>
 </html>

@@ -1,12 +1,6 @@
 p {
   margin-bottom: 0; }
 
-header {
-  font-weight: bold; }
-  header .username {
-    flex-direction: row;
-    justify-content: flex-end; }
-
 main {
   padding-top: 20px; }
   main .row {
@@ -29,11 +23,6 @@ summary {
   margin: 2px 0;
   align-self: flex-end;
   max-height: 30px; }
-
-#page-header {
-  padding-top: 10px;
-  background-color: #38AFFF;
-  color: white; }
 
 #user-actions {
   flex-direction: row;

@@ -1,0 +1,55 @@
+html {
+  position: relative;
+  min-height: 100%; }
+
+body {
+  margin-bottom: 60px; }
+
+h1 {
+  padding-bottom: 5px; }
+  h1 small {
+    color: #6d6de1;
+    padding-bottom: 5px;
+    vertical-align: middle;
+    line-height: 1.1; }
+
+small {
+  color: #6d6de1; }
+
+.row {
+  margin-top: 5px;
+  margin-bottom: 5px; }
+
+.jumbotron {
+  background-color: #6ac182; }
+  .jumbotron h5 {
+    margin-top: 20px; }
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  /* Set the fixed height of the footer here */
+  line-height: 60px;
+  /* Vertically center the text there */ }
+
+.underline {
+  border-bottom: 2px solid black; }
+
+.standout {
+  color: #0047df;
+  font-size: 1.2em; }
+
+.square-form {
+  border: solid 1px gray;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 20px; }
+
+.logout {
+  position: absolute;
+  top: 10px;
+  right: 10px; }
+
+/*# sourceMappingURL=vtext-style.css.map */

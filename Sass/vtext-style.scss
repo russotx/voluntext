@@ -1,0 +1,71 @@
+$h1-btm-pad: 5px;
+$sub-blue: #6d6de1;
+$hot-blue: rgb(0, 71, 223);
+$primary-green: rgb(106, 193, 130);
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;  
+}
+
+h1 {
+  padding-bottom: $h1-btm-pad;
+
+  small {
+    color: $sub-blue;
+    padding-bottom: $h1-btm-pad;
+    vertical-align: middle;
+    line-height: 1.1;
+  }
+}
+
+small {
+  color: $sub-blue;
+}
+
+.row {
+  margin-top: 5px;
+  margin-bottom: 5px;   
+}
+
+.jumbotron{
+  background-color: $primary-green; 
+  h5 {
+    margin-top: 20px;
+  }
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px; /* Set the fixed height of the footer here */
+  line-height: 60px; /* Vertically center the text there */
+}
+
+.underline {
+  border-bottom: 2px solid black;
+//  margin-bottom: 20px;
+}
+
+.standout {
+  color: $hot-blue; 
+  font-size: 1.2em;
+}
+
+.square-form {
+  border: solid 1px gray;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 20px;
+}
+
+.logout {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
