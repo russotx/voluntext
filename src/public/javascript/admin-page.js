@@ -32,7 +32,7 @@ adminPageLogic.sendAllSMS = function() {
   console.log('message data: \n', msgData);
   axios.post('/admin/api/send-all-sms', msgData)
   .then((response) => {
-    console.log('success sending SMS: ', response);
+    console.log('success sending SMS: ', response.data);
   })
   .catch((err) => {
     console.log('error sending SMS: ', err);

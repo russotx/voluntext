@@ -51,6 +51,19 @@ function validateOnboard(props) {
       let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
   }
+  
+  function validatePhone(phone) {
+    const usPhoneDigits = 10
+    let barePhone = phone.replace(/\D/g,'')
+    if (barePhone.length !== usPhoneDigits) {
+      return false
+    } 
+    if (barePhone[0] === '0') { 
+      return false
+    }
+    return true
+  }
+
   let email = props.email
   let pwd1 = props.password1
   let pwd2 = props.password2
@@ -68,11 +81,13 @@ function validateOnboard(props) {
     if (!(phone)) {
       phone = "phone number required"
       rej("invalid phone input")
+    } else if (!validatePhone(phone)) {
+        rej("invalid phone input")
     }
     res({
       email : email,
       password : pwd1,
-      phone : phone
+      phone : phone.replace(/\D/g,'')
     })
   })  
 }

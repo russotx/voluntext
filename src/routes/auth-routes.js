@@ -14,6 +14,10 @@ const wsServer = require('../wsServer')
 const FB = require('../config/facebook-helper').makeFBloginHelper
 const bwClient = require('../config/bandwidth-config')
 
+/****************************************************
+ *        Config Objects 
+ ***************************************************/
+
 /* options for .allFailed() or .success()--req.login() */
 const authOptions = {
   failureRedirect: '/login',
@@ -25,15 +29,19 @@ const facebookOptions = {
   failureRedirect: '/login'
 }
 
+/****************************************************
+ *          -- ROUTES -- 
+ ***************************************************/
+
 module.exports = (router, passport, root) => {
   
   /* -- ROUTER MIDDLEWARE -- */
   router.use('/user', isLoggedIn)
   router.use('/admin', isAdmin)
 
-  /*************************************************************************
+  /*****************************************************************
                 -- AUTHENTICATION ROUTES --
-  ***********************************************************************/
+  ******************************************************************/
 
   /* Local User/Password Authentication Route  */
   router.post('/api/auth', passport.authenticate('local-login', authOptions), 
@@ -198,9 +206,9 @@ module.exports = (router, passport, root) => {
     })
   })
 
-/************************************************************************
+/****************************************************************
                   -- ADMIN ROUTES --
-************************************************************************/
+*****************************************************************/
   
   const onboardOptions = {
     successRedirect: '/admin/onboard',
@@ -211,46 +219,27 @@ module.exports = (router, passport, root) => {
   /*  -- Admin Onboarding Volunteers Route -- */
   router.post('/admin/api/onboard', onboardUser(onboardOptions))
   
-  /* -- Admin Send SMS Requesting Hours -- */  
-  router.post('/admin/api/send-sms', (req, res) => {
-    let messageOpts = req.body
-    VolDataDoc.validateSMSopt(messageOpts.to)
-    .then((smsOpt) => {
-      if (smsOpt) {
-        bwClient.sendSMS(messageOpts, (err, bwRes, body) => {
-          if (err) {
-            console.log('bwClient "request" error: \n', err)
-            return res.send(err)
-          }
-          console.log('bwClient response: \n', bwRes)
-          return res.json(bwRes)
-        })
-      } else {
-          return res.json({ 'success' : false, 
-                          'reason' : 'user has not opted in to SMS messages' } )  
-      }
-    })
-    .catch((err) => {
-      console.log('error validating smsOpt: ', err)
-      return res.json( { 'success' : false, 'reason' : err } )
-    })
-  })
-  
   /* -- Admin Send SMS Requesting Hours To All Opted-In Numbers -- */  
+  /* Bandwidth sends a group message when sending bulk numbers- not a good idea */
   router.post('/admin/api/send-all-sms', (req, res) => {
-    let messageOpts = req.body
+    /* client req contains the message text and an optional tag to identify the message 
+       req.body = { "text" : "content", "tag" : "example" } */
+    let messageOpts = { 
+      text : req.body.text,
+      tag : req.body.tag
+    }
+    /* getAllSMSnumbers returns an array of phone number strings */
     VolDataDoc.getAllSMSnumbers()
     .then((optInNums) => {
-      messageOpts.to = optInNums
-      bwClient.sendSMS(messageOpts, (err, bwRes, body) => {
-        if (err) {
-          console.log('*** auth routes- bwClient "request" error: \n', err)
-          return res.send(err)
-        }
-        //console.log('bwClient response: \n', bwRes)
-        console.log('*** auth routes- bwClient body: \n', body)
-        return res.json(bwRes)
-      })
+      /* send the SMS messages to each number as a separate message */
+      bwClient.sendSeqMessages(messageOpts, optInNums)
+      .then((results) => {
+        console.log('messaging attempt results: \n',results)
+        /* return an object of helpful results information */
+        // TODO: create a collection for storing messaging attempt sessions admin can
+        // review to see if there are erroneous numbers or problems.
+        return res.json(results)
+      })   
     })
     .catch((err) => {
       console.log('error getting all sms optin numbers: ', err)

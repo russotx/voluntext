@@ -2,6 +2,7 @@ $h1-btm-pad: 5px;
 $sub-blue: #6d6de1;
 $hot-blue: rgb(0, 71, 223);
 $primary-green: rgb(106, 193, 130);
+$bad-red: #ffabab;
 
 html {
   position: relative;
@@ -68,4 +69,8 @@ small {
   position: absolute;
   top: 10px;
   right: 10px;
+}
+
+.form-group > .form-control.bad-input {
+  background-color: $bad-red;
 }
