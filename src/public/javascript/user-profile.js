@@ -15,7 +15,7 @@ const userPageLogic = {
   fbAppId : config.FACEBOOK_APP_ID,
   fbRedirect : config.FACEBOOK_CALLBACK_URL_OB,
   orgURL : config.ORG_URL,
-  orgHashtag : `#${config.ORG_HASHTAG}`,
+  orgHashtag : `#${config.ORG_HASH}`,
   FBhrsQuote : '',
   page : {
     smsRadio : document.getElementById('sms-radio'),
