@@ -16,6 +16,7 @@ vtext-session.yaml
 .eslintrc.json
 .vscode/
 result.json
+.sass-cache/
 
 # Runtime data
 pids
